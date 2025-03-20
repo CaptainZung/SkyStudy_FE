@@ -7,11 +7,11 @@ import '../ui/pages/dictionary/dictionary_category_page.dart';
 import '../ui/pages/detection/detection_page.dart';
 import '../ui/pages/achievements/achievements_page.dart';
 import '../ui/pages/englishbytopic/topic_page.dart';
-
+import '../ui/pages/onboarding/onboarding_page.dart';
 part 'app_routes.dart';
 
 class AppPages {
-  static const initial = Routes.login;
+  static const initial = Routes.onboard;
 
   static final routes = [
     GetPage(
@@ -39,6 +39,10 @@ class AppPages {
     GetPage(
       name: Routes.topic,
       page: () => const TopicPage(),
+    ),
+    GetPage(
+      name: Routes.onboard,
+      page: () => const OnboardingPage(),
     ),
   ];
 }

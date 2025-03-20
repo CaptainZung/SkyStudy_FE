@@ -23,6 +23,7 @@ dependencies:
   # Cupertino Icons cho iOS style icons
   cupertino_icons: ^1.0.8
   path_provider: ^2.1.4
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

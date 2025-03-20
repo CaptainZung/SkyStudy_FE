@@ -7,4 +7,5 @@ abstract class Routes {
   static const detection = '/detection';
   static const achievements = '/achievements';
   static const topic = '/topic';
+  static const onboard = '/onboard';
 }
