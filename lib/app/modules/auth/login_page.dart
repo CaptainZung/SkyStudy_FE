@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 import 'login_controller.dart';
+
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
@@ -21,15 +23,15 @@ class LoginPage extends GetView<LoginController> {
                   child: Center(
                     child: Image.asset(
                       'assets/images/logo.png',
-                      width: 300,
-                      height: 300,
+                      width: 500,
+                      height: 500,
                     ),
                   ),
                 ),
 
                 // Form đăng nhập
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.6,
+                  height: MediaQuery.of(context).size.height * 0.7,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: const BorderRadius.only(
@@ -104,7 +106,9 @@ class LoginPage extends GetView<LoginController> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Get.toNamed(Routes.register);
+                              },
                               child: const Text(
                                 'Tạo tài khoản',
                                 style: TextStyle(

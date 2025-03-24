@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:skystudy/app/modules/auth/register_binding.dart';
+import 'package:skystudy/app/modules/auth/register_page.dart';
 import '../modules/home/home_binding.dart';
 import '../modules/auth/login_binding.dart';
 import '../modules/auth/login_page.dart';
@@ -18,6 +20,11 @@ class AppPages {
       name: Routes.login,
       page: () => const LoginPage(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: Routes.register,
+      page: () => const RegisterPage(),
+      binding: RegisterBinding(),
     ),
     GetPage(
       name: Routes.home,

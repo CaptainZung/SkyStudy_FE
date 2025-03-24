@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import '../../api/api.dart';
+import '../../api/login_api.dart';
 import '../../routes/app_pages.dart';
 import 'package:get_storage/get_storage.dart';
 
