@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../controllers/login_controller.dart';
+import 'login_controller.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final LoginController controller = Get.find();
 
     return Scaffold(
       body: SafeArea(
         child: Container(
-          color: const Color.fromARGB(255, 132, 126, 117),
+          color: const Color.fromARGB(255, 43, 42, 40),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -135,7 +134,7 @@ class LoginPage extends StatelessWidget {
                         ElevatedButton(
                           onPressed: controller.handleLogin,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: const Color.fromARGB(255, 13, 24, 244),
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -161,7 +160,7 @@ class LoginPage extends StatelessWidget {
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                const Color.fromARGB(255, 193, 37, 231),
+                                const Color.fromARGB(255, 13, 24, 244),
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

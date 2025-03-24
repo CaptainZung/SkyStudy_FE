@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:skystudy/app/app.dart';
+import 'package:skystudy/app.dart';
 
 // import 'package:skystudy/main.dart';
 

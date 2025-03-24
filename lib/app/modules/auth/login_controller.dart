@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import '../api/api.dart';
-import '../routes/app_pages.dart';
+import '../../api/api.dart';
+import '../../routes/app_pages.dart';
 import 'package:get_storage/get_storage.dart';
 
 class LoginController extends GetxController {
-  final AuthAPI _authAPI = AuthAPI();
+  final AuthAPI authAPI = AuthAPI();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final obscurePassword = true.obs;
@@ -84,7 +84,7 @@ class LoginController extends GetxController {
 
     _showLottiePopup(animationPathNotifier, 'Đang đăng nhập...');
 
-    String? token = await _authAPI.login(email, password);
+    String? token = await authAPI.login(email, password);
 
     if (token != null) {
       // Lưu token vào GetStorage (nếu bạn đã thêm get_storage)

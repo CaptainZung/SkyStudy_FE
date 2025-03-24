@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../global_widgets/bottom_navbar.dart';
+import '../global_widgets/bottom_navbar.dart';
 
 class DetectionPage extends StatelessWidget {
   const DetectionPage({super.key});

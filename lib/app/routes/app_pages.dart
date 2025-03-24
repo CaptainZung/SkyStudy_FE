@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
-import '../bindings/home_binding.dart';
-import '../bindings/login_binding.dart';
-import '../ui/pages/auth/login_page.dart';
-import '../ui/pages/home/home_page.dart';
-import '../ui/pages/dictionary/dictionary_category_page.dart';
-import '../ui/pages/detection/detection_page.dart';
-import '../ui/pages/achievements/achievements_page.dart';
-import '../ui/pages/englishbytopic/topic_page.dart';
-import '../ui/pages/onboarding/onboarding_page.dart';
+import '../modules/home/home_binding.dart';
+import '../modules/auth/login_binding.dart';
+import '../modules/auth/login_page.dart';
+import '../modules/home/home_page.dart';
+import '../modules/dictionary/dictionary_category_page.dart';
+import '../modules/detection/detection_page.dart';
+import '../modules/achievements/achievements_page.dart';
+import '../modules/englishbytopic/topic_page.dart';
+import '../modules/onboarding/onboarding_page.dart';
 part 'app_routes.dart';
 
 class AppPages {

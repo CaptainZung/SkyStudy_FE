@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:skystudy/app/ui/global_widgets/bottom_navbar.dart';
+import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
 class AchievementsPage extends StatelessWidget {
   const AchievementsPage({super.key});
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../config/theme.dart';
-import 'routes/app_pages.dart';
+import 'config/theme.dart';
+import 'app/routes/app_pages.dart';
 
 class SkyStudyApp extends StatelessWidget {
   const SkyStudyApp({super.key});
@@ -9,9 +9,10 @@ class SkyStudyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      showPerformanceOverlay: false,
       title: 'SkyStudy',
       theme: appTheme(),
-      initialRoute: AppPages.initial, // Đổi từ INITIAL thành initial
+      initialRoute: AppPages.initial,
       getPages: AppPages.routes,
     );
   }

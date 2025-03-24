@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import '../../global_widgets/bottom_navbar.dart';
-import '../../../controllers/lottie_controller.dart';
+import '../global_widgets/bottom_navbar.dart';
+import '../../controllers/lottie_controller.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Lấy LottieController từ GetX
-    final LottieController controller = Get.find<LottieController>();
-
-    // Khởi tạo AnimationController với vsync
-    // Vì HomePage là StatelessWidget, chúng ta cần một StatefulWidget để cung cấp vsync
+    // Inject LottieController nếu chưa inject
+    final LottieController controller = Get.put(LottieController());
     return _HomePageView(controller: controller);
   }
 }
 
 class _HomePageView extends StatefulWidget {
   final LottieController controller;
-
   const _HomePageView({required this.controller});
-
   @override
   _HomePageViewState createState() => _HomePageViewState();
 }
@@ -34,8 +29,15 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
   @override
   void initState() {
     super.initState();
-    // Khởi tạo AnimationController với vsync
     widget.controller.initialize(this);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.stopAnimations(); // Dừng animations
+    widget.controller.onClose(); // Dispose controllers
+    Get.delete<LottieController>(); // Xóa instance
+    super.dispose();
   }
 
   @override
@@ -64,10 +66,10 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
                 fit: BoxFit.contain,
                 controller: widget.controller.ufoController,
                 onLoaded: (composition) {
-                  _ufoComposition = composition;
-                  if (_ufoComposition != null && _dinoComposition != null) {
-                    widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
-                  }
+                    _ufoComposition = composition; // Bỏ if (composition != null)
+                    if (_dinoComposition != null) { // Chỉ cần kiểm tra _dinoComposition
+                      widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
+                    }
                 },
               ),
             ),
@@ -81,10 +83,10 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
                 fit: BoxFit.contain,
                 controller: widget.controller.dinoController,
                 onLoaded: (composition) {
-                  _dinoComposition = composition;
-                  if (_ufoComposition != null && _dinoComposition != null) {
-                    widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
-                  }
+                    _dinoComposition = composition;
+                    if (_ufoComposition != null && _dinoComposition != null) {
+                      widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
+                    }
                 },
               ),
             ),

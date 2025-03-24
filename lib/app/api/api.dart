@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
 class AuthAPI {
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  static const String baseUrl = 'http://10.0.2.2:8000/api/auth';
   final Dio dio = Dio();
   final Logger logger = Logger();
 
@@ -26,7 +26,7 @@ class AuthAPI {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        return data['token']; // Trả về token
+        return data['access_token']; // Trả về access token
       } else {
         logger.e('Login failed: ${response.statusCode} - ${response.data}');
         return null;

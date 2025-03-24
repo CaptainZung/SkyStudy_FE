@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
+import '../../routes/app_pages.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -17,11 +17,11 @@ class OnboardingPageState extends State<OnboardingPage> {
   final List<Map<String, dynamic>> onboardingData = [
     {
       'background': 'assets/images/onboarding.png',
-      'text': '',
+      'text': 'Chào mừng đến với SkyStudy!\n Hãy lướt qua phải để biết thêm ',
     },
     {
       'background': 'assets/images/onboarding_1.png',
-      'text': '',
+      'text': 'Nhìn, nghe, chạm tay - học hay, nhớ lâu, giỏi ngay mỗi ngày!',
     },
     {
       'background': 'assets/images/onboarding_2.png',
@@ -127,7 +127,7 @@ class OnboardingPageState extends State<OnboardingPage> {
                           ),
                         ),
                         child: const Text(
-                          'Đăng nhập ngay',
+                          'Tiếp tục',
                           style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
                       )
