@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:skystudy/app/routes/app_pages.dart';
 import 'login_controller.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 
-
-class LoginPage extends GetView<LoginController> {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  _LoginPageState createState() => _LoginPageState();
+}
 
+class _LoginPageState extends State<LoginPage> {
+  late LoginController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(LoginController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<LoginController>();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -17,7 +34,6 @@ class LoginPage extends GetView<LoginController> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                // Logo chính giữa
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.35,
                   child: Center(
@@ -28,21 +44,19 @@ class LoginPage extends GetView<LoginController> {
                     ),
                   ),
                 ),
-
-                // Form đăng nhập
                 Container(
                   height: MediaQuery.of(context).size.height * 0.7,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(30),
                       topRight: Radius.circular(30),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color.fromRGBO(0, 0, 0, 0.2),
+                        color: Color.fromRGBO(0, 0, 0, 0.2),
                         blurRadius: 20,
-                        offset: const Offset(0, 5),
+                        offset: Offset(0, 5),
                         spreadRadius: 2,
                       ),
                     ],
@@ -53,126 +67,37 @@ class LoginPage extends GetView<LoginController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 20),
-                        const Text(
-                          'Email',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextField(
-                          controller: controller.emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            hintText: 'example@gmail.com',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
+                        buildInputField('Email', controller.emailController, TextInputType.emailAddress, 'example@gmail.com'),
                         const SizedBox(height: 20),
-                        const Text(
-                          'Mật khẩu',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Obx(
-                          () => TextField(
-                            controller: controller.passwordController,
-                            obscureText: controller.obscurePassword.value,
-                            decoration: InputDecoration(
-                              hintText: '********',
-                              hintStyle: const TextStyle(color: Colors.grey),
-                              border: const OutlineInputBorder(),
-                              suffixIcon: IconButton(
-                                icon: Text(
-                                  controller.obscurePassword.value
-                                      ? '🙉'
-                                      : '🙈',
-                                  style: const TextStyle(fontSize: 25),
-                                ),
-                                onPressed: controller.togglePasswordVisibility,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Nút tạo tài khoản và quên mật khẩu
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                Get.toNamed(Routes.register);
-                              },
-                              child: const Text(
-                                'Tạo tài khoản',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 44, 44, 44),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'Quên mật khẩu?',
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 14,
-                                  fontStyle: FontStyle.italic,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        Obx(() => buildPasswordField('Mật khẩu', controller.passwordController, controller.obscurePassword, controller.togglePasswordVisibility, '********')),
                         const SizedBox(height: 30),
-
-                        // Nút đăng nhập
-                        ElevatedButton(
-                          onPressed: controller.handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 13, 24, 244),
-                            minimumSize: const Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            'ĐĂNG NHẬP',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
+                        Obx(() => controller.isLoading.value
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElevatedButton(
+                                onPressed: controller.handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(255, 13, 24, 244),
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text('ĐĂNG NHẬP', style: TextStyle(color: Colors.white)),
+                              )),
                         const SizedBox(height: 15),
-
-                        // Hoặc dùng thử
-                        const Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            '---------------  HOẶC  ---------------',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 13, 24, 244),
-                            minimumSize: const Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              Get.offNamed(Routes.register);
+                            },
+                            child: const Text(
+                              'Chưa có tài khoản? Đăng ký',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'DÙNG THỬ',
-                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],
@@ -184,6 +109,57 @@ class LoginPage extends GetView<LoginController> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildInputField(String label, TextEditingController controller, TextInputType inputType, String hint) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
+        ),
+        TextField(
+          controller: controller,
+          keyboardType: inputType,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.grey),
+          ),
+          enabled: mounted,
+        ),
+      ],
+    );
+  }
+
+  Widget buildPasswordField(String label, TextEditingController controller, RxBool obscureText, VoidCallback toggleVisibility, String hint) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
+        ),
+        TextField(
+          controller: controller,
+          obscureText: obscureText.value,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.grey),
+            suffixIcon: IconButton(
+              icon: Text(
+                obscureText.value ? '🙉' : '🙈',
+                style: const TextStyle(fontSize: 25),
+              ),
+              onPressed: toggleVisibility,
+            ),
+          ),
+          enabled: mounted,
+        ),
+      ],
     );
   }
 }

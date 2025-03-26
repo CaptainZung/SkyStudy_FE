@@ -32,7 +32,7 @@ class OnboardingPageState extends State<OnboardingPage> {
       'text': 'XIN CHÀO!\nHọc cùng AI, nhanh tay, nhanh trí, tương lai rộng mở!\n\nVà còn nhiều điều thú vị đang chờ bạn phía sau nhé!',
     },
   ];
-
+  
   @override
   void dispose() {
     _pageController.dispose();

@@ -3,21 +3,22 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import '../global_widgets/bottom_navbar.dart';
 import '../../controllers/lottie_controller.dart';
+import 'home_controller.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Inject LottieController nếu chưa inject
-    final LottieController controller = Get.put(LottieController());
-    return _HomePageView(controller: controller);
+    final LottieController lottieController = Get.find<LottieController>();
+    return _HomePageView(controller: lottieController);
   }
 }
 
 class _HomePageView extends StatefulWidget {
   final LottieController controller;
   const _HomePageView({required this.controller});
+
   @override
   _HomePageViewState createState() => _HomePageViewState();
 }
@@ -30,22 +31,42 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
   void initState() {
     super.initState();
     widget.controller.initialize(this);
+    Get.find<HomeController>().fetchProfile(); // Gọi fetchProfile khi vào trang
   }
 
   @override
   void dispose() {
-    widget.controller.stopAnimations(); // Dừng animations
-    widget.controller.onClose(); // Dispose controllers
-    Get.delete<LottieController>(); // Xóa instance
+    widget.controller.stopAnimations();
+    widget.controller.onClose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final HomeController homeController = Get.find<HomeController>();
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
+            Positioned(
+              top: 20,
+              right: 20,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await homeController.logout();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                ),
+                child: const Text(
+                  'Đăng xuất',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -66,10 +87,10 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
                 fit: BoxFit.contain,
                 controller: widget.controller.ufoController,
                 onLoaded: (composition) {
-                    _ufoComposition = composition; // Bỏ if (composition != null)
-                    if (_dinoComposition != null) { // Chỉ cần kiểm tra _dinoComposition
-                      widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
-                    }
+                  _ufoComposition = composition;
+                  if (_dinoComposition != null) {
+                    widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
+                  }
                 },
               ),
             ),
@@ -83,10 +104,10 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
                 fit: BoxFit.contain,
                 controller: widget.controller.dinoController,
                 onLoaded: (composition) {
-                    _dinoComposition = composition;
-                    if (_ufoComposition != null && _dinoComposition != null) {
-                      widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
-                    }
+                  _dinoComposition = composition;
+                  if (_ufoComposition != null && _dinoComposition != null) {
+                    widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
+                  }
                 },
               ),
             ),

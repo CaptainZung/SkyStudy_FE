@@ -21,10 +21,9 @@ class AppPages {
       page: () => const LoginPage(),
       binding: LoginBinding(),
     ),
-    GetPage(
-      name: Routes.register,
-      page: () => const RegisterPage(),
-      binding: RegisterBinding(),
+    GetPage(name: Routes.register,
+     page: () => const RegisterPage(),
+     binding: RegisterBinding(),
     ),
     GetPage(
       name: Routes.home,

@@ -1,16 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-Future<void> showLottiePopup({
-  required BuildContext context,
-  required String initialAnimationPath,
-  String? message,
-  required ValueNotifier<String> animationPathNotifier,
-}) async {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) => Dialog(
+class LottiePopup extends StatefulWidget {
+  final String initialAnimationPath;
+  final String? message;
+  final ValueNotifier<String> animationPathNotifier;
+  final Duration? duration;
+
+  const LottiePopup({
+    super.key,
+    required this.initialAnimationPath,
+    this.message,
+    required this.animationPathNotifier,
+    this.duration,
+  });
+
+  @override
+  State<LottiePopup> createState() => _LottiePopupState();
+}
+
+class _LottiePopupState extends State<LottiePopup> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.duration != null) {
+      Future.delayed(widget.duration!, () {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
       backgroundColor: Colors.white,
       elevation: 10,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -19,9 +43,8 @@ Future<void> showLottiePopup({
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Lắng nghe sự thay đổi animationPath
             ValueListenableBuilder<String>(
-              valueListenable: animationPathNotifier,
+              valueListenable: widget.animationPathNotifier,
               builder: (context, animationPath, _) {
                 return Lottie.asset(
                   animationPath,
@@ -32,19 +55,39 @@ Future<void> showLottiePopup({
                 );
               },
             ),
-            if (message != null) ...[
+            if (widget.message != null) ...[
               const SizedBox(height: 10),
               Text(
-                message,
+                widget.message!,
                 style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+Future<void> showLottiePopup({
+  required BuildContext context,
+  required String initialAnimationPath,
+  String? message,
+  required ValueNotifier<String> animationPathNotifier,
+  Duration? duration,
+}) async {
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => LottiePopup(
+      initialAnimationPath: initialAnimationPath,
+      message: message,
+      animationPathNotifier: animationPathNotifier,
+      duration: duration,
     ),
   );
 }
