@@ -1,10 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
+import 'package:get/get.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 
 class AuthManager {
   static const String _tokenKey = 'access_token';
   static const String _tokenExpiryKey = 'token_expiry';
-  static const String _refreshTokenKey = 'refresh_token'; // Thêm key cho refresh token
+  static const String _refreshTokenKey = 'refresh_token';
   static final Logger logger = Logger();
 
   static Future<void> saveToken(String? token, int expiryInSeconds) async {

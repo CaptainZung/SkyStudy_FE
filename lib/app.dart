@@ -3,7 +3,12 @@ import 'package:get/get.dart';
 import 'config/theme.dart';
 import 'app/routes/app_pages.dart';
 import 'app/api/login_api.dart';
-import 'app/utils/onboarding_manager.dart';
+import 'app/utils/onboarding_manager.dart'; // Đổi sang đường dẫn đúng của OnboardingManager
+
+
+void main() {
+  runApp(const SkyStudyApp());
+}
 
 class SkyStudyApp extends StatelessWidget {
   const SkyStudyApp({super.key});
@@ -15,9 +20,9 @@ class SkyStudyApp extends StatelessWidget {
     if (!hasSeenOnboarding) {
       return Routes.onboard;
     } else if (isLoggedIn) {
-      return Routes.home;
+      return Routes.home; 
     } else {
-      return Routes.login;
+      return Routes.login; 
     }
   }
 
@@ -51,6 +56,7 @@ class SkyStudyApp extends StatelessWidget {
           initialRoute: initialRoute,
           getPages: AppPages.routes,
           enableLog: true,
+          debugShowCheckedModeBanner: false, // Tắt banner debug
         );
       },
     );

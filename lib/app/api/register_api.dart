@@ -8,18 +8,38 @@ class RegisterAPI {
   final Logger logger = Logger();
 
   RegisterAPI() {
+    logger.i('Initializing RegisterAPI with baseUrl: $baseUrl');
     dio.options.baseUrl = baseUrl;
-    dio.options.connectTimeout = const Duration(seconds: 15); // Đồng bộ với AuthAPI
-    dio.options.receiveTimeout = const Duration(seconds: 30); // Đồng bộ với AuthAPI
+    dio.options.connectTimeout = const Duration(seconds: 15);
+    dio.options.receiveTimeout = const Duration(seconds: 15);
     dio.options.headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     };
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        logger.i('Sending request: ${options.method} ${options.uri}');
+        logger.i('Request data: ${options.data}');
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        logger.i('Received response: ${response.statusCode} ${response.data}');
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) {
+        logger.e('Request error: ${e.message}');
+        if (e.response != null) {
+          logger.e('Error response: ${e.response?.statusCode} ${e.response?.data}');
+        }
+        return handler.next(e);
+      },
+    ));
   }
 
   Future<Map<String, dynamic>> register(String username, String email, String password) async {
     try {
       logger.i('Registering user - Username: $username, Email: $email');
+      logger.i('Sending request to $baseUrl/register');
       final response = await dio.post(
         '/register',
         data: {

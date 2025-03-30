@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import '../global_widgets/bottom_navbar.dart';
 import '../../controllers/lottie_controller.dart';
 import 'home_controller.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -31,7 +32,7 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
   void initState() {
     super.initState();
     widget.controller.initialize(this);
-    Get.find<HomeController>().fetchProfile(); // Gọi fetchProfile khi vào trang
+    Get.find<HomeController>().fetchProfile();
   }
 
   @override
@@ -49,24 +50,6 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
       body: SafeArea(
         child: Stack(
           children: [
-            Positioned(
-              top: 20,
-              right: 20,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await homeController.logout();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                ),
-                child: const Text(
-                  'Đăng xuất',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -109,6 +92,50 @@ class _HomePageViewState extends State<_HomePageView> with TickerProviderStateMi
                     widget.controller.startAnimations(_ufoComposition!, _dinoComposition!);
                   }
                 },
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 10,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await homeController.logout();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Đăng xuất',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
+            // Thêm nút "Tạo tài khoản"
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.75,
+              left: MediaQuery.of(context).size.width * 0.25,
+              right: MediaQuery.of(context).size.width * 0.25,
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.toNamed(Routes.register);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 13, 24, 244),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'TẠO TÀI KHOẢN',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             ),
           ],

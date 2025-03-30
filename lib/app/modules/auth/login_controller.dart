@@ -12,7 +12,7 @@ class LoginController extends GetxController {
   final obscurePassword = true.obs;
   final Logger logger = Logger();
   var isLoading = false.obs;
-  var _isMounted = true; // Biến để kiểm tra trạng thái controller
+  var _isMounted = true;
 
   @override
   void onInit() {
@@ -98,6 +98,61 @@ class LoginController extends GetxController {
 
     try {
       final result = await authAPI.login(email, password);
+      if (result['success'] == true) {
+        animationPathNotifier.value = 'assets/lottie/success_loading.json';
+        await Future.delayed(const Duration(seconds: 1));
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        if (_isMounted && Get.currentRoute != Routes.home) {
+          Get.offAllNamed(Routes.home);
+        }
+      } else {
+        animationPathNotifier.value = 'assets/lottie/fail_loading.json';
+        await Future.delayed(const Duration(seconds: 1));
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        await Future.delayed(const Duration(milliseconds: 200));
+        if (_isMounted) {
+          _showLottiePopup(ValueNotifier('assets/lottie/fail_loading.json'), result['message']);
+          await Future.delayed(const Duration(seconds: 2));
+          if (Get.isDialogOpen == true) {
+            Get.back();
+          }
+        }
+      }
+    } catch (e) {
+      animationPathNotifier.value = 'assets/lottie/fail_loading.json';
+      await Future.delayed(const Duration(seconds: 1));
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (_isMounted) {
+        _showLottiePopup(ValueNotifier('assets/lottie/fail_loading.json'), 'Đã có lỗi xảy ra: ${e.toString()}');
+        await Future.delayed(const Duration(seconds: 2));
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+      }
+    } finally {
+      if (_isMounted) {
+        isLoading.value = false;
+      }
+    }
+  }
+
+  // Hàm đăng nhập với tư cách khách
+  Future<void> loginAsGuest() async {
+    if (!_isMounted) return;
+
+    isLoading.value = true;
+    ValueNotifier<String> animationPathNotifier = ValueNotifier('assets/lottie/loading.json');
+    _showLottiePopup(animationPathNotifier, 'Đang đăng nhập với tư cách khách...');
+
+    try {
+      final result = await authAPI.loginAsGuest();
       if (result['success'] == true) {
         animationPathNotifier.value = 'assets/lottie/success_loading.json';
         await Future.delayed(const Duration(seconds: 1));

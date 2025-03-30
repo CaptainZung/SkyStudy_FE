@@ -9,16 +9,24 @@ class AuthAPI {
   final Dio dio = Dio();
   final Logger logger = Logger();
   String? _accessToken;
+  bool _isRefreshing = false; // Biến để tránh vòng lặp refresh token
 
   AuthAPI() {
     dio.options.baseUrl = ApiConfig.baseUrl;
     dio.options.connectTimeout = const Duration(seconds: 10);
-    dio.options.receiveTimeout = const Duration(seconds: 30); // Tăng timeout lên 30 giây
+    dio.options.receiveTimeout = const Duration(seconds: 30);
     dio.options.headers = {'Content-Type': 'application/json'};
 
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (options.path.contains('/login') 
+          || options.path.contains('/refresh') 
+          || options.path.contains('/loginGuest')) {
+            logger.i('Skipping Authorization header for ${options.path}');
+            return handler.next(options);
+          }
+
           _accessToken ??= await AuthManager.getToken();
           if (_accessToken != null && await AuthManager.isTokenValid()) {
             options.headers['Authorization'] = 'Bearer $_accessToken';
@@ -38,7 +46,7 @@ class AuthAPI {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          if (e.response?.statusCode == 401) {
+          if (e.response?.statusCode == 401 && !e.requestOptions.path.contains('/login') && !e.requestOptions.path.contains('/loginGuest')) {
             final newToken = await _refreshAccessToken();
             if (newToken != null) {
               e.requestOptions.headers['Authorization'] = 'Bearer $newToken';
@@ -62,7 +70,7 @@ class AuthAPI {
       logger.i('Response: ${response.statusCode} - ${response.data}');
 
       if (response.statusCode == 200) {
-        final data = response.data['data']; // Truy cập vào "data" trong response
+        final data = response.data['data'];
         if (data == null) {
           logger.e('Response data is null');
           return {'success': false, 'message': 'Response data is missing'};
@@ -72,7 +80,8 @@ class AuthAPI {
           logger.e('Access token is null');
           return {'success': false, 'message': 'Access token is missing'};
         }
-        await AuthManager.saveToken(accessToken, 3600);
+        final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600; // Mặc định 1 giờ nếu không có expiresIn
+        await AuthManager.saveToken(accessToken, expiryInSeconds);
         if (data['refresh_token'] != null) {
           await AuthManager.saveRefreshToken(data['refresh_token']);
         }
@@ -88,18 +97,68 @@ class AuthAPI {
       if (e.response != null) {
         return {
           'success': false,
-          'message': e.response?.data['message']?.toString() ?? 'Error: ${e.response?.statusCode}'
+          'message': e.response?.data['message']?.toString() ?? 'Email hoặc mật khẩu không đúng'
         };
       } else {
-        return {'success': false, 'message': 'Error: Could not connect to server'};
+        return {'success': false, 'message': 'Không thể kết nối đến server'};
       }
     } catch (e) {
       logger.e('Unexpected error during login: $e');
-      return {'success': false, 'message': 'Unexpected error: ${e.toString()}'};
+      return {'success': false, 'message': 'Lỗi không xác định: ${e.toString()}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> loginAsGuest() async {
+    try {
+      final response = await dio.post('/loginGuest');
+      logger.i('Guest Login Response: ${response.statusCode} - ${response.data}');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data == null) {
+          logger.e('Guest login response data is null');
+          return {'success': false, 'message': 'Response data is missing'};
+        }
+        final accessToken = data['access_token']?.toString();
+        if (accessToken == null) {
+          logger.e('Guest access token is null');
+          return {'success': false, 'message': 'Access token is missing'};
+        }
+        final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600; // Mặc định 1 giờ nếu không có expiresIn
+        await AuthManager.saveToken(accessToken, expiryInSeconds);
+        if (data['refresh_token'] != null) {
+          await AuthManager.saveRefreshToken(data['refresh_token']);
+        }
+        _accessToken = accessToken;
+        logger.i('Guest logged in successfully: ${response.data}');
+        return {'success': true, 'data': data};
+      } else {
+        logger.e('Guest login failed: ${response.statusCode} - ${response.data}');
+        return {'success': false, 'message': 'Guest login failed: ${response.data}'};
+      }
+    } on DioException catch (e) {
+      logger.e('DioException during guest login: ${e.message}, Response: ${e.response?.data}');
+      if (e.response != null) {
+        return {
+          'success': false,
+          'message': e.response?.data['message']?.toString() ?? 'Không thể đăng nhập với tư cách khách'
+        };
+      } else {
+        return {'success': false, 'message': 'Không thể kết nối đến server'};
+      }
+    } catch (e) {
+      logger.e('Unexpected error during guest login: $e');
+      return {'success': false, 'message': 'Lỗi không xác định: ${e.toString()}'};
     }
   }
 
   Future<String?> _refreshAccessToken() async {
+    if (_isRefreshing) {
+      logger.w('Refresh token is already in progress');
+      return null;
+    }
+
+    _isRefreshing = true;
     try {
       final refreshToken = await AuthManager.getRefreshToken();
       if (refreshToken == null) {
@@ -107,21 +166,23 @@ class AuthAPI {
         return null;
       }
 
-      final response = await dio.post('/refresh', data: {'refresh_token': refreshToken});
+      final response = await dio.post('/refresh', data: {'refreshToken': refreshToken});
       if (response.statusCode == 200) {
-        final data = response.data['data']; // Truy cập vào "data" trong response
+        final data = response.data['data'];
         if (data == null) {
           logger.e('Response data is null');
           return null;
         }
         final accessToken = data['access_token']?.toString();
+        final newRefreshToken = data['refresh_token']?.toString();
+        final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600; // Mặc định 1 giờ nếu không có expiresIn
         if (accessToken == null) {
           logger.e('Refreshed access token is null');
           return null;
         }
-        await AuthManager.saveToken(accessToken, 3600);
-        if (data['refresh_token'] != null) {
-          await AuthManager.saveRefreshToken(data['refresh_token']);
+        await AuthManager.saveToken(accessToken, expiryInSeconds);
+        if (newRefreshToken != null) {
+          await AuthManager.saveRefreshToken(newRefreshToken);
         }
         _accessToken = accessToken;
         logger.i('Token refreshed successfully');
@@ -136,6 +197,8 @@ class AuthAPI {
     } catch (e) {
       logger.e('Unexpected error refreshing token: $e');
       return null;
+    } finally {
+      _isRefreshing = false;
     }
   }
 

@@ -10,23 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # State management và điều hướng
+  camera: ^0.11.1
+  permission_handler: ^11.0.1
+  path_provider: ^2.0.11
+  shared_preferences: ^2.0.15
+  # Các dependency khác (nếu có)
+  dio: ^5.0.0
+  logger: ^2.0.0
   get: ^4.6.5
-  # HTTP client để gọi API
-  dio: ^5.8.0
-  # Logging framework để thay thế print
-  logger: ^2.5.0
-  # Hỗ trợ animation Lottie
+  image: ^4.0.0
   lottie: ^3.3.1
-  # Lưu trữ dữ liệu cục bộ (ví dụ: lưu token sau khi đăng nhập)
   get_storage: ^2.1.1
-  # Cupertino Icons cho iOS style icons
-  cupertino_icons: ^1.0.8
-  path_provider: ^2.1.4
-  shared_preferences: ^2.2.2
-  camera: ^0.10.5+5
-  path: ^1.8.3
-  image: ^4.0.17
 
 dev_dependencies:
   flutter_test:

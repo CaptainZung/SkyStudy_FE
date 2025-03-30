@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:skystudy/app/api/register_api.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
-import 'package:skystudy/app/modules/global_widgets/lottie_popup.dart';
+// import 'package:skystudy/app/modules/global_widgets/lottie_popup.dart';
 import 'package:logger/logger.dart';
 
 class RegisterController extends GetxController {
@@ -57,124 +57,56 @@ class RegisterController extends GetxController {
 
     logger.i('Starting registration process: username=$username, email=$email');
 
+    // Kiểm tra input
     if (username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ValueNotifier<String> animationPathNotifier = ValueNotifier('assets/lottie/fail_loading.json');
-      await showLottiePopup(
-        context: Get.context!,
-        initialAnimationPath: 'assets/lottie/fail_loading.json',
-        message: 'Vui lòng điền đầy đủ thông tin',
-        animationPathNotifier: animationPathNotifier,
-        duration: const Duration(seconds: 1),
-      );
+      Get.snackbar('Lỗi', 'Vui lòng điền đầy đủ thông tin', duration: const Duration(seconds: 1));
       return;
     }
 
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      ValueNotifier<String> animationPathNotifier = ValueNotifier('assets/lottie/fail_loading.json');
-      await showLottiePopup(
-        context: Get.context!,
-        initialAnimationPath: 'assets/lottie/fail_loading.json',
-        message: 'Email không hợp lệ',
-        animationPathNotifier: animationPathNotifier,
-        duration: const Duration(seconds: 1),
-      );
+      Get.snackbar('Lỗi', 'Email không hợp lệ', duration: const Duration(seconds: 1));
       return;
     }
 
     if (password.length < 8) {
-      ValueNotifier<String> animationPathNotifier = ValueNotifier('assets/lottie/fail_loading.json');
-      await showLottiePopup(
-        context: Get.context!,
-        initialAnimationPath: 'assets/lottie/fail_loading.json',
-        message: 'Mật khẩu phải dài ít nhất 8 ký tự',
-        animationPathNotifier: animationPathNotifier,
-        duration: const Duration(seconds: 1),
-      );
+      Get.snackbar('Lỗi', 'Mật khẩu phải dài ít nhất 8 ký tự', duration: const Duration(seconds: 1));
       return;
     }
 
     if (password != confirmPassword) {
-      ValueNotifier<String> animationPathNotifier = ValueNotifier('assets/lottie/fail_loading.json');
-      await showLottiePopup(
-        context: Get.context!,
-        initialAnimationPath: 'assets/lottie/fail_loading.json',
-        message: 'Mật khẩu nhập lại không khớp',
-        animationPathNotifier: animationPathNotifier,
-        duration: const Duration(seconds: 1),
-      );
+      Get.snackbar('Lỗi', 'Mật khẩu nhập lại không khớp', duration: const Duration(seconds: 1));
       return;
     }
 
     isLoading.value = true;
-    ValueNotifier<String> animationPathNotifier = ValueNotifier('assets/lottie/loading.json');
-    await showLottiePopup(
-      context: Get.context!,
-      initialAnimationPath: 'assets/lottie/loading.json',
-      message: 'Đang đăng ký...',
-      animationPathNotifier: animationPathNotifier,
-    );
+    Get.snackbar('Thông báo', 'Đang đăng ký...', duration: null);
 
     try {
       logger.i('Calling registerAPI.register...');
-      // Thêm timeout 10 giây cho API call
       final result = await registerAPI.register(username, email, password).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 15),
         onTimeout: () {
-          logger.e('Register API timed out after 10 seconds');
+          logger.e('Register API timed out after 15 seconds');
           throw Exception('Hết thời gian chờ, vui lòng kiểm tra kết nối mạng');
         },
       );
       logger.i('Register API response: $result');
 
       if (result['success']) {
-        animationPathNotifier.value = 'assets/lottie/success_loading.json';
-        await Future.delayed(const Duration(seconds: 1));
-        if (Navigator.canPop(Get.context!)) {
-          Navigator.of(Get.context!).pop();
-          logger.i('Closed success dialog');
-        }
+        Get.back(); // Đóng snackbar
+        Get.snackbar('Thành công', 'Đăng ký thành công', duration: const Duration(seconds: 2));
         if (_isMounted && Get.currentRoute != Routes.login) {
           Get.offAllNamed(Routes.login);
           logger.i('Navigated to login page');
         }
       } else {
-        animationPathNotifier.value = 'assets/lottie/fail_loading.json';
-        await Future.delayed(const Duration(seconds: 1));
-        if (Navigator.canPop(Get.context!)) {
-          Navigator.of(Get.context!).pop();
-          logger.i('Closed fail dialog');
-        }
-        await Future.delayed(const Duration(milliseconds: 200));
-        if (_isMounted) {
-          await showLottiePopup(
-            context: Get.context!,
-            initialAnimationPath: 'assets/lottie/fail_loading.json',
-            message: result['message'] ?? 'Đăng ký thất bại',
-            animationPathNotifier: ValueNotifier('assets/lottie/fail_loading.json'),
-            duration: const Duration(seconds: 2),
-          );
-          logger.i('Showed failure message: ${result['message']}');
-        }
+        Get.back(); // Đóng snackbar
+        Get.snackbar('Lỗi', result['message'] ?? 'Đăng ký thất bại', duration: const Duration(seconds: 2));
       }
     } catch (e) {
       logger.e('Error during registration: $e');
-      animationPathNotifier.value = 'assets/lottie/fail_loading.json';
-      await Future.delayed(const Duration(seconds: 1));
-      if (Navigator.canPop(Get.context!)) {
-        Navigator.of(Get.context!).pop();
-        logger.i('Closed error dialog');
-      }
-      await Future.delayed(const Duration(milliseconds: 200));
-      if (_isMounted) {
-        await showLottiePopup(
-          context: Get.context!,
-          initialAnimationPath: 'assets/lottie/fail_loading.json',
-          message: 'Đã có lỗi xảy ra: ${e.toString()}',
-          animationPathNotifier: ValueNotifier('assets/lottie/fail_loading.json'),
-          duration: const Duration(seconds: 2),
-        );
-        logger.i('Showed error message: ${e.toString()}');
-      }
+      Get.back(); // Đóng snackbar
+      Get.snackbar('Lỗi', 'Đã có lỗi xảy ra: ${e.toString()}', duration: const Duration(seconds: 2));
     } finally {
       if (_isMounted) {
         isLoading.value = false;

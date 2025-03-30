@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
 
 class DetectionController extends GetxController {
   CameraController? cameraController;
@@ -19,37 +20,72 @@ class DetectionController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeDio();
     initializeCamera();
+  }
+
+  void _initializeDio() {
+    dio.options.baseUrl = 'http://10.0.2.2:5000';
+    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.receiveTimeout = const Duration(seconds: 30);
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          logger.i('Sending request: ${options.method} ${options.uri}');
+          logger.i('Request data: ${options.data}');
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          logger.i('Received response: ${response.statusCode} ${response.data}');
+          return handler.next(response);
+        },
+        onError: (DioException e, handler) {
+          logger.e('Request error: ${e.message}');
+          if (e.response != null) {
+            logger.e('Error response: ${e.response?.statusCode} ${e.response?.data}');
+          }
+          return handler.next(e);
+        },
+      ),
+    );
   }
 
   Future<void> initializeCamera() async {
     try {
+      // Kiểm tra và yêu cầu quyền camera
+      var cameraStatus = await Permission.camera.status;
+      if (!cameraStatus.isGranted) {
+        cameraStatus = await Permission.camera.request();
+        if (!cameraStatus.isGranted) {
+          errorMessage.value = 'Camera permission denied. Please grant camera permission to use this feature.';
+          logger.w('Camera permission denied');
+          return;
+        }
+      }
+
+      // Lấy danh sách camera
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
-        logger.e('No cameras available on this device');
         errorMessage.value = 'No cameras available on this device';
+        logger.e('No cameras available');
         return;
       }
 
+      // Khởi tạo camera
       cameraController = CameraController(
         cameras[0],
         ResolutionPreset.medium,
+        enableAudio: false,
       );
 
-      await cameraController!.initialize().then((_) {
-        if (Get.isRegistered<DetectionController>()) {
-          isCameraInitialized.value = true;
-          logger.i('Camera initialized successfully');
-          errorMessage.value = '';
-          startImageStream();
-        }
-      }).catchError((e) {
-        logger.e('Error initializing camera: $e');
-        errorMessage.value = 'Error initializing camera: $e';
-      });
+      await cameraController!.initialize();
+      isCameraInitialized.value = true;
+      logger.i('Camera initialized successfully');
+      errorMessage.value = '';
+      startImageStream();
     } catch (e) {
-      logger.e('Unexpected error while initializing camera: $e');
-      errorMessage.value = 'Unexpected error: $e';
+      errorMessage.value = 'Failed to initialize camera: $e';
+      logger.e('Error initializing camera: $e');
     }
   }
 
@@ -80,7 +116,6 @@ class DetectionController extends GetxController {
     });
   }
 
-  // Chuyển CameraImage thành bytes (định dạng JPEG)
   Future<Uint8List> _convertCameraImageToBytes(CameraImage image) async {
     try {
       // Chuyển YUV sang RGB
@@ -129,7 +164,7 @@ class DetectionController extends GetxController {
     try {
       logger.i('Sending frame to detection API');
       final response = await dio.post(
-        'http://10.0.2.2:5000/detect',
+        '/detect',
         data: {'image': base64Image},
       );
 

@@ -85,6 +85,22 @@ class _LoginPageState extends State<LoginPage> {
                                 child: const Text('ĐĂNG NHẬP', style: TextStyle(color: Colors.white)),
                               )),
                         const SizedBox(height: 15),
+                        // Thêm nút "Đăng nhập với tư cách khách"
+                        Obx(() => controller.isLoading.value
+                            ? const SizedBox.shrink()
+                            : OutlinedButton(
+                                onPressed: controller.loginAsGuest,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color.fromARGB(255, 13, 24, 244),
+                                  side: const BorderSide(color: Color.fromARGB(255, 13, 24, 244)),
+                                  minimumSize: const Size(double.infinity, 50),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text('ĐĂNG NHẬP VỚI TƯ CÁCH KHÁCH', style: TextStyle(color: Color.fromARGB(255, 13, 24, 244))),
+                              )),
+                        const SizedBox(height: 15),
                         Center(
                           child: TextButton(
                             onPressed: () {

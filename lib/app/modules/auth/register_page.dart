@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Thêm import này để dùng SystemNavigator
 import 'package:get/get.dart';
-import 'register_controller.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
+import 'register_controller.dart';
 
-class RegisterPage extends GetView<RegisterController> {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
+  @override
+  RegisterPageState createState() => RegisterPageState();
+}
+
+class RegisterPageState extends State<RegisterPage> {
+  late RegisterController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(RegisterController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<RegisterController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.lightBlueAccent], // Đồng bộ với HomePage
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
+          color: const Color.fromARGB(255, 43, 42, 40),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -26,13 +40,14 @@ class RegisterPage extends GetView<RegisterController> {
                   child: Center(
                     child: Image.asset(
                       'assets/images/logo.png',
-                      width: 250,
-                      height: 250,
+                      width: 500,
+                      height: 500,
                     ),
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.65,
+                  // Bỏ chiều cao cố định để tránh overflow
+                  // height: MediaQuery.of(context).size.height * 0.7,
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -43,7 +58,8 @@ class RegisterPage extends GetView<RegisterController> {
                       BoxShadow(
                         color: Color.fromRGBO(0, 0, 0, 0.2),
                         blurRadius: 20,
-                        offset: Offset(0, -5),
+                        offset: Offset(0, 5),
+                        spreadRadius: 2,
                       ),
                     ],
                   ),
@@ -51,40 +67,41 @@ class RegisterPage extends GetView<RegisterController> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min, // Sử dụng min để Column co giãn theo nội dung
                       children: [
-                        const SizedBox(height: 20),
-                        buildInputField('Tên', controller.usernameController, TextInputType.name, 'Nhập tên của bạn'),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10), // Giảm khoảng cách
+                        buildInputField('Tên', controller.usernameController, TextInputType.text, 'Tên của bạn'),
+                        const SizedBox(height: 10), // Giảm khoảng cách
                         buildInputField('Email', controller.emailController, TextInputType.emailAddress, 'example@gmail.com'),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10), // Giảm khoảng cách
                         Obx(() => buildPasswordField('Mật khẩu', controller.passwordController, controller.obscurePassword, controller.togglePasswordVisibility, '********')),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10), // Giảm khoảng cách
                         Obx(() => buildPasswordField('Nhập lại mật khẩu', controller.confirmPasswordController, controller.obscureConfirmPassword, controller.toggleConfirmPasswordVisibility, '********')),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 20), // Giảm khoảng cách
                         Obx(() => controller.isLoading.value
-                            ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                            ? const Center(child: CircularProgressIndicator())
                             : ElevatedButton(
                                 onPressed: controller.handleRegister,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent,
-                                  minimumSize: const Size(double.infinity, 60),
+                                  backgroundColor: const Color.fromARGB(255, 13, 24, 244),
+                                  minimumSize: const Size(double.infinity, 50),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  elevation: 5,
                                 ),
-                                child: const Text('ĐĂNG KÝ', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                                child: const Text('ĐĂNG KÝ', style: TextStyle(color: Colors.white)),
                               )),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10), // Giảm khoảng cách
                         Center(
                           child: TextButton(
-                            onPressed: () => Get.offNamed(Routes.login),
+                            onPressed: () {
+                              Get.offNamed(Routes.login);
+                            },
                             child: const Text(
                               'Đã có tài khoản? Đăng nhập',
                               style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                                fontSize: 14,
                                 decoration: TextDecoration.underline,
                               ),
                             ),
@@ -108,20 +125,17 @@ class RegisterPage extends GetView<RegisterController> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 18, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
         TextField(
           controller: controller,
           keyboardType: inputType,
           decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            filled: true,
-            fillColor: Colors.grey[100],
+            border: const OutlineInputBorder(),
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.grey),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           ),
+          enabled: mounted,
         ),
       ],
     );
@@ -133,24 +147,24 @@ class RegisterPage extends GetView<RegisterController> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 18, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: obscureText.value,
           decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            filled: true,
-            fillColor: Colors.grey[100],
+            border: const OutlineInputBorder(),
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.grey),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
             suffixIcon: IconButton(
-              icon: Icon(obscureText.value ? Icons.visibility_off : Icons.visibility, color: Colors.blueAccent),
+              icon: Text(
+                obscureText.value ? '🙉' : '🙈',
+                style: const TextStyle(fontSize: 25),
+              ),
               onPressed: toggleVisibility,
             ),
           ),
+          enabled: mounted,
         ),
       ],
     );
