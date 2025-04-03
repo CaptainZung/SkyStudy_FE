@@ -9,4 +9,7 @@ abstract class Routes {
   static const achievements = '/achievements';
   static const topic = '/topic';
   static const onboard = '/onboard';
+  static const realtime = '/realtime';
+  static const aispeech = '/aispeech';
+  static const detectionresult = '/detectionresult';
 }

@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
-import 'package:get/get.dart';
-import 'package:skystudy/app/routes/app_pages.dart';
+// import 'package:get/get.dart';
+// import 'package:skystudy/app/routes/app_pages.dart';
 
 class AuthManager {
   static const String _tokenKey = 'access_token';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Thêm import này để dùng SystemNavigator
+// import 'package:flutter/services.dart'; // Thêm import này để dùng SystemNavigator
 import 'package:get/get.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'register_controller.dart';

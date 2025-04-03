@@ -1,203 +1,250 @@
-import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
-import 'package:image/image.dart' as img;
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:skystudy/app/api/ai_api.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 
 class DetectionController extends GetxController {
-  CameraController? cameraController;
   var isCameraInitialized = false.obs;
-  var detectedObjects = <Map<String, dynamic>>[].obs;
+  CameraController? cameraController;
+  var isFlashOn = false.obs;
   var errorMessage = ''.obs;
+  var detectedObjects = <Map<String, dynamic>>[].obs;
+  var processedImageBase64 = ''.obs;
+  var showProcessedImage = false.obs;
+  var isLoading = false.obs;
+
+  List<CameraDescription> cameras = [];
+  int selectedCameraIndex = 0;
   final Dio dio = Dio();
-  final Logger logger = Logger();
-  bool _isProcessing = false;
 
   @override
   void onInit() {
     super.onInit();
-    _initializeDio();
     initializeCamera();
   }
 
-  void _initializeDio() {
-    dio.options.baseUrl = 'http://10.0.2.2:5000';
-    dio.options.connectTimeout = const Duration(seconds: 30);
-    dio.options.receiveTimeout = const Duration(seconds: 30);
-    dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          logger.i('Sending request: ${options.method} ${options.uri}');
-          logger.i('Request data: ${options.data}');
-          return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          logger.i('Received response: ${response.statusCode} ${response.data}');
-          return handler.next(response);
-        },
-        onError: (DioException e, handler) {
-          logger.e('Request error: ${e.message}');
-          if (e.response != null) {
-            logger.e('Error response: ${e.response?.statusCode} ${e.response?.data}');
-          }
-          return handler.next(e);
-        },
-      ),
-    );
-  }
-
   Future<void> initializeCamera() async {
-    try {
-      // Kiểm tra và yêu cầu quyền camera
-      var cameraStatus = await Permission.camera.status;
-      if (!cameraStatus.isGranted) {
-        cameraStatus = await Permission.camera.request();
-        if (!cameraStatus.isGranted) {
-          errorMessage.value = 'Camera permission denied. Please grant camera permission to use this feature.';
-          logger.w('Camera permission denied');
-          return;
-        }
-      }
-
-      // Lấy danh sách camera
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) {
-        errorMessage.value = 'No cameras available on this device';
-        logger.e('No cameras available');
-        return;
-      }
-
-      // Khởi tạo camera
-      cameraController = CameraController(
-        cameras[0],
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
-
-      await cameraController!.initialize();
-      isCameraInitialized.value = true;
-      logger.i('Camera initialized successfully');
-      errorMessage.value = '';
-      startImageStream();
-    } catch (e) {
-      errorMessage.value = 'Failed to initialize camera: $e';
-      logger.e('Error initializing camera: $e');
-    }
-  }
-
-  void startImageStream() {
-    if (cameraController == null || !cameraController!.value.isInitialized) {
-      logger.w('Camera is not initialized for streaming');
-      errorMessage.value = 'Camera is not initialized for streaming';
+    var status = await Permission.camera.request();
+    if (status.isDenied) {
+      errorMessage.value = 'Quyền truy cập camera bị từ chối. Vui lòng cấp quyền để sử dụng camera.';
+      print('Camera permission denied');
       return;
     }
 
-    cameraController!.startImageStream((CameraImage image) async {
-      if (_isProcessing) return;
-      _isProcessing = true;
+    if (status.isPermanentlyDenied) {
+      errorMessage.value = 'Quyền truy cập camera bị từ chối vĩnh viễn. Vui lòng bật quyền trong cài đặt.';
+      print('Camera permission permanently denied');
+      return;
+    }
 
-      try {
-        // Chuyển CameraImage thành base64
-        final bytes = await _convertCameraImageToBytes(image);
-        final base64Image = base64Encode(bytes);
-
-        // Gửi khung hình lên server
-        await detectObjects(base64Image);
-      } catch (e) {
-        logger.e('Error processing image stream: $e');
-        errorMessage.value = 'Error processing image stream: $e';
-      } finally {
-        _isProcessing = false;
-      }
-    });
-  }
-
-  Future<Uint8List> _convertCameraImageToBytes(CameraImage image) async {
     try {
-      // Chuyển YUV sang RGB
-      final yuvImage = img.Image(
-        width: image.width,
-        height: image.height,
+      cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        errorMessage.value = 'Không tìm thấy camera trên thiết bị này.';
+        print('No cameras found on this device');
+        return;
+      }
+
+      print('Found ${cameras.length} cameras');
+      selectedCameraIndex = 0;
+      cameraController = CameraController(
+        cameras[selectedCameraIndex],
+        ResolutionPreset.high,
+        enableAudio: false,
       );
 
-      final yBuffer = image.planes[0].bytes;
-      final uBuffer = image.planes[1].bytes;
-      final vBuffer = image.planes[2].bytes;
-
-      // Chuyển đổi YUV sang RGB
-      for (int y = 0; y < image.height; y++) {
-        for (int x = 0; x < image.width; x++) {
-          final int uvIndex = (x ~/ 2) + (y ~/ 2) * (image.width ~/ 2);
-          final int index = y * image.width + x;
-
-          final int yp = yBuffer[index];
-          final int up = uBuffer[uvIndex];
-          final int vp = vBuffer[uvIndex];
-
-          // Chuyển YUV sang RGB
-          int r = (yp + vp * 1436 / 1024 - 179).round();
-          int g = (yp - up * 46549 / 131072 + 44 - vp * 93604 / 131072 + 91).round();
-          int b = (yp + up * 1814 / 1024 - 227).round();
-
-          r = r.clamp(0, 255);
-          g = g.clamp(0, 255);
-          b = b.clamp(0, 255);
-
-          yuvImage.setPixelRgb(x, y, r, g, b);
-        }
-      }
-
-      // Chuyển RGB sang JPEG
-      final jpegBytes = img.encodeJpg(yuvImage);
-      return Uint8List.fromList(jpegBytes);
+      print('Initializing camera...');
+      await cameraController!.initialize();
+      print('Camera initialized successfully');
+      isCameraInitialized.value = true;
+      update();
     } catch (e) {
-      logger.e('Error converting CameraImage to bytes: $e');
-      throw Exception('Failed to convert CameraImage to bytes: $e');
+      errorMessage.value = 'Lỗi khi khởi tạo camera: $e';
+      print('Error initializing camera: $e');
     }
   }
 
-  Future<void> detectObjects(String base64Image) async {
+  void toggleFlash() async {
+    if (cameraController == null || !cameraController!.value.isInitialized) return;
     try {
-      logger.i('Sending frame to detection API');
-      final response = await dio.post(
-        '/detect',
-        data: {'image': base64Image},
+      isFlashOn.value = !isFlashOn.value;
+      await cameraController!.setFlashMode(
+        isFlashOn.value ? FlashMode.torch : FlashMode.off,
       );
+    } catch (e) {
+      Get.snackbar('Lỗi', 'Không thể bật/tắt đèn flash: $e');
+    }
+  }
 
+  void switchCamera() async {
+    if (cameraController == null || !cameraController!.value.isInitialized) return;
+    if (cameras.length < 2) return;
+
+    try {
+      await cameraController!.dispose();
+      selectedCameraIndex = (selectedCameraIndex + 1) % cameras.length;
+      cameraController = CameraController(
+        cameras[selectedCameraIndex],
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+      await cameraController!.initialize();
+      isFlashOn.value = false;
+      update();
+    } catch (e) {
+      Get.snackbar('Lỗi', 'Không thể chuyển camera: $e');
+    }
+  }
+
+  Future<void> captureAndPredict() async {
+    if (cameraController == null || !cameraController!.value.isInitialized) {
+      Get.snackbar('Lỗi', 'Camera chưa được khởi tạo.');
+      print('Camera not initialized');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      update();
+
+      print('Chụp ảnh...');
+      final image = await cameraController!.takePicture();
+      print('Ảnh đã chụp: ${image.path}');
+      final file = File(image.path);
+
+      if (!file.existsSync()) {
+        Get.snackbar('Lỗi', 'Không thể tìm thấy file ảnh đã chụp.');
+        print('File ảnh không tồn tại: ${image.path}');
+        return;
+      }
+
+      final fileSize = await file.length();
+      print('Kích thước file ảnh: $fileSize bytes');
+      if (fileSize == 0) {
+        Get.snackbar('Lỗi', 'File ảnh rỗng. Vui lòng thử lại.');
+        print('File ảnh rỗng');
+        return;
+      }
+
+      print('Chuẩn bị gửi ảnh lên server...');
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: 'image.jpg',
+          contentType: MediaType('image', 'jpeg'),
+        ),
+      });
+
+      print('Gửi request tới ${ApiConfig.predictEndpoint}');
+      final response = await dio.post(
+        ApiConfig.predictEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      ).catchError((error) {
+        if (error is DioException && error.response != null) {
+          print('Lỗi từ server: ${error.response!.statusCode} - ${error.response!.data}');
+          Get.snackbar('Lỗi từ server', 'Mã lỗi: ${error.response!.statusCode}\nChi tiết: ${error.response!.data}');
+        } else {
+          print('Lỗi không xác định: $error');
+          Get.snackbar('Lỗi', 'Không thể kết nối tới server: $error');
+        }
+        throw error;
+      });
+
+      print('Nhận response từ server: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data['success']) {
+        print('Dữ liệu từ server: $data');
+
+        if (data['predictions'] != null && data['predictions'] is List) {
           detectedObjects.clear();
-          detectedObjects.addAll(List<Map<String, dynamic>>.from(data['objects']));
-          for (var i = 0; i < detectedObjects.length; i++) {
-            detectedObjects[i]['color'] = Colors.primaries[i % Colors.primaries.length];
-          }
-          logger.i('Detection successful: ${detectedObjects.length} objects detected');
+          detectedObjects.addAll(List<Map<String, dynamic>>.from(data['predictions']));
+          processedImageBase64.value = data['image']?.toString() ?? '';
+          showProcessedImage.value = true;
+          print('Đã cập nhật detectedObjects: ${detectedObjects.length} đối tượng');
+          print('Điều hướng sang DetectionResultPage...');
+          Get.toNamed(
+            Routes.detectionresult,
+            arguments: {
+              'processedImageBase64': processedImageBase64.value,
+              'detectedObjects': detectedObjects.toList(),
+            },
+          );
         } else {
-          logger.e('Detection failed: ${data['message']}');
-          errorMessage.value = 'Detection failed: ${data['message']}';
+          Get.snackbar('Lỗi', 'Không tìm thấy predictions trong response từ server.');
+          print('Không tìm thấy predictions trong response');
         }
       } else {
-        logger.e('Failed to call detection API: ${response.statusCode}');
-        errorMessage.value = 'Failed to call detection API: ${response.statusCode}';
+        Get.snackbar('Lỗi', 'Không thể nhận dạng: ${response.statusCode}');
+        print('Lỗi nhận dạng: ${response.statusCode} - ${response.data}');
       }
     } catch (e) {
-      logger.e('Error during detection: $e');
-      errorMessage.value = 'Error during detection: $e';
+      print('Lỗi trong captureAndPredict: $e');
+      Get.snackbar('Lỗi', 'Lỗi trong quá trình chụp và nhận diện: $e');
     } finally {
+      isLoading.value = false;
       update();
     }
   }
 
+  Future<void> disposeCamera() async {
+    try {
+      if (cameraController != null) {
+        print('Bắt đầu dispose camera...');
+        if (cameraController!.value.isStreamingImages) {
+          print('Dừng stream hình ảnh...');
+          await cameraController!.stopImageStream();
+        }
+        if (cameraController!.value.isInitialized) {
+          print('Dispose camera controller...');
+          await cameraController!.dispose();
+        }
+        cameraController = null;
+        isCameraInitialized.value = false;
+        showProcessedImage.value = false;
+        detectedObjects.clear();
+        processedImageBase64.value = '';
+        update();
+        print('Camera đã được dispose thành công');
+      } else {
+        print('CameraController đã là null, không cần dispose');
+      }
+    } catch (e) {
+      print('Lỗi khi dispose camera: $e');
+      Get.snackbar('Lỗi', 'Không thể giải phóng camera: $e');
+    }
+  }
+
+  void navigateToRealtime() {
+    print('Chuyển sang RealtimePage...');
+    disposeCamera().then((_) {
+      Get.offNamed(Routes.realtime);
+    });
+  }
+
+  @override
+  void dispose() {
+    Get.delete<DetectionController>();
+    super.dispose();
+  }
+
   @override
   void onClose() {
-    cameraController?.stopImageStream();
+    if (cameraController != null && cameraController!.value.isStreamingImages) {
+      cameraController!.stopImageStream();
+    }
     cameraController?.dispose();
-    logger.i('DetectionController closed');
+    cameraController = null;
+    detectedObjects.clear();
+    print('DetectionController onClose');
     super.onClose();
   }
 }
