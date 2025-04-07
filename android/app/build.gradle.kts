@@ -20,11 +20,11 @@ android {
 
     defaultConfig {
         applicationId = "com.example.skystudy"
-        minSdk = flutter.minSdkVersion
+        minSdkVersion(24) // Sửa thành cú pháp Kotlin: minSdkVersion(24)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        resValue("string", "enable_impeller", "false") // Sửa dòng này
+        resValue("string", "enable_impeller", "false")
     }
 
     buildTypes {

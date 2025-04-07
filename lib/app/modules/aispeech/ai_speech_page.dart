@@ -29,9 +29,10 @@ class AISpeechPage extends StatelessWidget {
                     children: controller.words.asMap().entries.map((entry) {
                       int index = entry.key;
                       String word = entry.value;
-                      bool isHighlighted = controller.highlightedWordIndex.value == index;
+                      // Highlight tất cả các từ từ đầu đến vị trí hiện tại
+                      bool isHighlighted = controller.highlightedWordIndex.value >= index;
                       return Text(
-                        word,
+                        '$word ', // Thêm khoảng trắng để tách từ
                         style: TextStyle(
                           fontSize: 18,
                           color: isHighlighted ? Colors.green : Colors.red,
@@ -41,12 +42,6 @@ class AISpeechPage extends StatelessWidget {
                     }).toList(),
                   );
                 }),
-                const SizedBox(height: 8),
-                // Câu tiếng Anh đầy đủ
-                Text(
-                  controller.sentence,
-                  style: const TextStyle(fontSize: 16),
-                ),
                 const SizedBox(height: 16),
                 // Câu tiếng Việt
                 Text(
@@ -54,24 +49,51 @@ class AISpeechPage extends StatelessWidget {
                   style: const TextStyle(fontSize: 16, color: Colors.black54),
                 ),
                 const SizedBox(height: 16),
-                // Nút phát âm thanh
-                Obx(() {
-                  return ElevatedButton.icon(
-                    onPressed: controller.isPlaying.value ? null : () => controller.playAudio(),
-                    icon: Icon(
-                      controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
-                      color: Colors.white,
-                    ),
-                    label: Text(
-                      controller.isPlaying.value ? 'Đang phát...' : 'Phát âm thanh',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  );
-                }),
+                // Nút phát âm thanh và nút chuyển đổi giọng nói
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Nút phát/tạm dừng âm thanh
+                    Obx(() {
+                      return ElevatedButton.icon(
+                        onPressed: controller.isPlaying.value
+                            ? () => controller.pauseAudio()
+                            : () => controller.playAudio(),
+                        icon: Icon(
+                          controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          controller.isPlaying.value ? 'Tạm dừng' : 'Phát âm thanh',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      );
+                    }),
+                    const SizedBox(width: 16),
+                    // Nút chuyển đổi giọng nói
+                    Obx(() {
+                      return ElevatedButton.icon(
+                        onPressed: () => controller.toggleVoice(),
+                        icon: Icon(
+                          controller.selectedVoice.value == 'female' ? Icons.female : Icons.male,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          controller.selectedVoice.value == 'female' ? 'Giọng nữ' : 'Giọng nam',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
                 const SizedBox(height: 16),
                 // Tên đối tượng và Lottie animation
                 if (controller.detectedObjects.isNotEmpty)

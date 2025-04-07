@@ -46,7 +46,12 @@ class DetectionResultController extends GetxController {
     }
   }
 
-  void onTtsPressed() {
-    Get.snackbar('Thông báo', 'Chức năng TTS chưa được triển khai.');
+  void onTtsPressed(Map<String, dynamic> object) {
+    Get.toNamed(
+      Routes.pronunciationcheck,
+      arguments: {
+        'sampleSentence': object['label'], // Truyền từ nhận diện (ví dụ: "water bottle")
+      },
+    );
   }
 }

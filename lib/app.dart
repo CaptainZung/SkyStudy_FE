@@ -53,7 +53,7 @@ class SkyStudyApp extends StatelessWidget {
           showPerformanceOverlay: false,
           title: 'SkyStudy',
           theme: appTheme(),
-          initialRoute: Routes.realtime,
+          initialRoute: Routes.detection,
           getPages: AppPages.routes,
         );
       },

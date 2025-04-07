@@ -1,10 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:camera/camera.dart';
-import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'realtime_controller.dart';
+import 'package:camera/camera.dart';
 
 class RealtimePage extends StatelessWidget {
   const RealtimePage({super.key});
@@ -13,106 +10,80 @@ class RealtimePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<RealtimeController>(
       init: RealtimeController(),
-      builder: (controller) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                // controller.disposeCamera();
-                Get.back();
-              },
+      builder: (controller) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Nhận diện vật thể'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.switch_camera),
+              onPressed: controller.toggleCamera,
             ),
-            title: const Text('Real-Time Detection'),
-            backgroundColor: Colors.blue,
+          ],
+        ),
+        body: _buildCameraView(controller),
+      ),
+    );
+  }
+
+  Widget _buildCameraView(RealtimeController controller) {
+    return Obx(() {
+      if (!controller.isCameraInitialized.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildCameraPreview(controller),
+          _buildDetectedClassDisplay(controller),
+        ],
+      );
+    });
+  }
+
+  Widget _buildCameraPreview(RealtimeController controller) {
+    return Center(
+      child: AspectRatio(
+        aspectRatio: controller.cameraController!.value.aspectRatio,
+        child: CameraPreview(controller.cameraController!),
+      ),
+    );
+  }
+
+  Widget _buildDetectedClassDisplay(RealtimeController controller) {
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: Obx(() {
+        final detected = controller.detectedClasses;
+
+        if (detected.isEmpty) {
+          return const SizedBox(); // Không hiển thị gì nếu chưa detect
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(12),
           ),
-          body: Stack(
-            children: [
-              Obx(() {
-                if (controller.errorMessage.value.isNotEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          controller.errorMessage.value,
-                          style: const TextStyle(color: Colors.red, fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (controller.errorMessage.value.contains('permission'))
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                await openAppSettings();
-                              },
-                              child: const Text('Open Settings to Grant Permission'),
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                }
-
-                double? cameraAspectRatio;
-                if (controller.isCameraInitialized.value &&
-                    controller.cameraController != null &&
-                    controller.cameraController!.value.isInitialized) {
-                  cameraAspectRatio = controller.cameraController!.value.aspectRatio;
-                }
-
-                if (controller.processedImageBase64.value.isNotEmpty) {
-                  return AspectRatio(
-                    aspectRatio: cameraAspectRatio ?? 4 / 3,
-                    child: Image.memory(
-                      base64Decode(controller.processedImageBase64.value),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(child: Text('Lỗi khi hiển thị ảnh từ server'));
-                      },
-                    ),
-                  );
-                }
-
-                if (controller.isCameraInitialized.value &&
-                    controller.cameraController != null &&
-                    controller.cameraController!.value.isInitialized) {
-                  return CameraPreview(controller.cameraController!);
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              }),
-              Obx(() {
-                if (controller.detectedObjects.isNotEmpty) {
-                  return Positioned(
-                    top: 20,
-                    left: 20,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      color: Colors.black54,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: controller.detectedObjects.map((object) {
-                          return Text(
-                            '${object['label'] ?? 'Không xác định'} : ${object['label_vi'] ?? 'Không xác định'}',
-                            style: const TextStyle(color: Colors.white, fontSize: 16),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-            ],
-          ),
-          bottomNavigationBar: const CustomBottomNavBar(
-            currentIndex: 2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: detected.map((label) {
+              return Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            }).toList(),
           ),
         );
-      },
+      }),
     );
   }
 }

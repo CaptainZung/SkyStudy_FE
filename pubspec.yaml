@@ -10,7 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: ^0.11.1
+  tflite_flutter: ^0.11.0
+  async: ^2.11.0
+  camera: ^0.11.1 
   permission_handler: ^11.0.1
   path_provider: ^2.0.11
   shared_preferences: ^2.0.15
@@ -18,14 +20,14 @@ dependencies:
   dio: ^5.0.0
   logger: ^2.0.0
   get: ^4.6.5
-  image: ^4.0.0
+  image: ^4.0.11
   lottie: ^3.3.1
   get_storage: ^2.1.1
   web_socket_channel: ^3.0.2
   http_parser : ^4.0.2
   http : ^1.2.2
   audioplayers: ^5.2.1
-
+  flutter_sound: ^9.2.13
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -46,3 +48,8 @@ flutter:
     - assets/icons/
     - assets/audio/
     - assets/lottie/
+    - assets/yolo11n_float16.tflite
+    - assets/yolo11n_float32.tflite
+    - assets/yolov2_tiny.tflite
+    - assets/yolov2_tiny.txt
+    - assets/efficientdet_lite0.tflite

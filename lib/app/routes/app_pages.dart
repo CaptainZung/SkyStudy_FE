@@ -3,6 +3,8 @@ import 'package:skystudy/app/modules/aispeech/ai_speech_binding.dart';
 import 'package:skystudy/app/modules/auth/register_binding.dart';
 import 'package:skystudy/app/modules/auth/register_page.dart';
 import 'package:skystudy/app/modules/detection/detection_resullt_page.dart';
+import 'package:skystudy/app/modules/pronunciation_check/pronunciation_check_binding.dart';
+import 'package:skystudy/app/modules/pronunciation_check/pronunciation_check_page.dart';
 import '../modules/home/home_binding.dart';
 import 'package:skystudy/app/modules/detection/detection_result_binding.dart';
 import '../modules/auth/login_binding.dart';
@@ -68,6 +70,11 @@ class AppPages {
       name: Routes.aispeech,
       page: () => const AISpeechPage(),
       binding: AISpeechBinding(),
+    ),
+    GetPage(
+      name: Routes.pronunciationcheck,
+      page: () => const PronunciationCheckPage(),
+      binding: PronunciationCheckBinding(),
     ),
   ];
 }

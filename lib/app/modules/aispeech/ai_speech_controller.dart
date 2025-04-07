@@ -7,6 +7,8 @@ import 'package:skystudy/app/api/ai_api.dart';
 class AISpeechController extends GetxController {
   var isPlaying = false.obs;
   var highlightedWordIndex = (-1).obs; // Chỉ số từ đang được highlight
+  var selectedVoice = 'female'.obs; // Trạng thái giọng nói (male/female)
+  var isPaused = false.obs; // Trạng thái tạm dừng
   late List<Map<String, dynamic>> detectedObjects;
   late String sentence;
   late String translatedSentence;
@@ -20,29 +22,49 @@ class AISpeechController extends GetxController {
     final Map<String, dynamic> args = Get.arguments ?? {};
     detectedObjects = args['detectedObjects']?.cast<Map<String, dynamic>>() ?? [];
     sentence = args['sentence']?.toString() ?? '';
-    translatedSentence = args['translatedSentence']?.toString() ?? '';
-    words = sentence.split(' '); // Tách câu thành danh sách các từ
+    translatedSentence = args['translated_sentence']?.toString() ?? '';
+    // Tách câu thành danh sách từ, loại bỏ ký tự đặc biệt và đảm bảo khoảng trắng
+    words = sentence
+        .replaceAll(RegExp(r'[^\w\s]'), ' ') // Thay ký tự đặc biệt bằng khoảng trắng
+        .split(' ')
+        .where((word) => word.isNotEmpty)
+        .toList();
     print('AISpeechController initialized. Sentence: $sentence, Translated: $translatedSentence');
+  }
+
+  // Hàm để chuyển đổi giọng nói
+  void toggleVoice() {
+    selectedVoice.value = (selectedVoice.value == 'female') ? 'male' : 'female';
+    audioBase64 = ''; // Xóa audio cũ để fetch lại với giọng mới
+    isPlaying.value = false;
+    isPaused.value = false;
+    highlightedWordIndex.value = -1;
+    audioPlayer.stop(); // Dừng audio khi chuyển giọng
   }
 
   Future<void> fetchAudio() async {
     try {
+      // Làm sạch chuỗi sentence trước khi gửi
+      String cleanSentence = sentence
+          .replaceAll(RegExp(r'[^\w\s]'), '') // Loại bỏ ký tự đặc biệt
+          .trim(); // Loại bỏ khoảng trắng thừa
+
       final response = await http.post(
         Uri.parse(ApiConfig.audioEndpoint),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({
-          'word': sentence, // Gửi toàn bộ câu để tạo audio
-          'voice': 'female',
+          'word': cleanSentence, // Gửi chuỗi đã làm sạch
+          'voice': selectedVoice.value, // Sử dụng giọng nói đã chọn
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        audioBase64 = data['audio_base64'] ?? '';
+        audioBase64 = data['audio_base64']?.toString() ?? '';
         print('Audio fetched successfully. Base64 length: ${audioBase64.length}');
       } else {
-        Get.snackbar('Lỗi', 'Không thể lấy audio: ${response.statusCode}');
-        print('Failed to fetch audio: ${response.statusCode}');
+        print('Error response: ${response.body}'); // In chi tiết lỗi từ backend
+        Get.snackbar('Lỗi', 'Không thể lấy audio: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       Get.snackbar('Lỗi', 'Lỗi khi gọi API audio: $e');
@@ -51,8 +73,18 @@ class AISpeechController extends GetxController {
   }
 
   Future<void> playAudio() async {
+    // Nếu đang tạm dừng, tiếp tục phát
+    if (isPaused.value) {
+      isPaused.value = false;
+      isPlaying.value = true;
+      await audioPlayer.resume();
+      _continueHighlighting();
+      return;
+    }
+
+    // Nếu không có audio, fetch audio mới
     if (audioBase64.isEmpty) {
-      await fetchAudio(); // Lấy audio nếu chưa có
+      await fetchAudio();
     }
 
     if (audioBase64.isEmpty) {
@@ -64,24 +96,49 @@ class AISpeechController extends GetxController {
       isPlaying.value = true;
       highlightedWordIndex.value = -1;
 
-      // Chuyển Base64 thành bytes
       final audioBytes = base64Decode(audioBase64);
-
-      // Phát âm thanh
       await audioPlayer.play(BytesSource(audioBytes));
 
-      // Tạo hiệu ứng highlight từng từ
-      for (int i = 0; i < words.length; i++) {
-        highlightedWordIndex.value = i;
-        await Future.delayed(const Duration(milliseconds: 500)); // Thời gian delay giữa các từ
-      }
-
-      isPlaying.value = false;
-      highlightedWordIndex.value = -1;
+      _startHighlighting();
     } catch (e) {
       Get.snackbar('Lỗi', 'Lỗi khi phát âm thanh: $e');
       print('Error playing audio: $e');
       isPlaying.value = false;
+      isPaused.value = false;
+      highlightedWordIndex.value = -1;
+    }
+  }
+
+  Future<void> pauseAudio() async {
+    if (isPlaying.value && !isPaused.value) {
+      isPaused.value = true;
+      isPlaying.value = false;
+      await audioPlayer.pause();
+    }
+  }
+
+  Future<void> _startHighlighting() async {
+    for (int i = 0; i < words.length; i++) {
+      if (!isPlaying.value) break; // Dừng highlight nếu không còn phát
+      highlightedWordIndex.value = i;
+      await Future.delayed(const Duration(milliseconds: 400));
+    }
+    if (isPlaying.value) {
+      isPlaying.value = false;
+      isPaused.value = false;
+      highlightedWordIndex.value = -1;
+    }
+  }
+
+  Future<void> _continueHighlighting() async {
+    for (int i = highlightedWordIndex.value + 1; i < words.length; i++) {
+      if (!isPlaying.value) break; // Dừng highlight nếu không còn phát
+      highlightedWordIndex.value = i;
+      await Future.delayed(const Duration(milliseconds: 350));
+    }
+    if (isPlaying.value) {
+      isPlaying.value = false;
+      isPaused.value = false;
       highlightedWordIndex.value = -1;
     }
   }

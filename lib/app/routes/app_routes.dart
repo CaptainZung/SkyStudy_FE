@@ -12,4 +12,5 @@ abstract class Routes {
   static const realtime = '/realtime';
   static const aispeech = '/aispeech';
   static const detectionresult = '/detectionresult';
+  static const pronunciationcheck = '/pronunciationcheck';
 }

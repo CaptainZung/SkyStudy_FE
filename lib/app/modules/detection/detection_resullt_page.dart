@@ -10,9 +10,8 @@ class DetectionResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sử dụng GetBuilder thay vì Get.find để đảm bảo controller được khởi tạo
     return GetBuilder<DetectionResultController>(
-      init: DetectionResultController(), // Khởi tạo controller nếu cần
+      init: DetectionResultController(),
       builder: (controller) {
         return Scaffold(
           appBar: const CustomAppBar(
@@ -73,7 +72,7 @@ class DetectionResultPage extends StatelessWidget {
                                               IconButton(
                                                 icon: Image.asset('assets/icons/tts.png', width: 24, height: 24),
                                                 onPressed: () {
-                                                  controller.onTtsPressed();
+                                                  controller.onTtsPressed(object);
                                                 },
                                               ),
                                             ],
