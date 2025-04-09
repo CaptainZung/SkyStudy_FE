@@ -1,89 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import 'realtime_controller.dart';
-import 'package:camera/camera.dart';
-
+ 
 class RealtimePage extends StatelessWidget {
   const RealtimePage({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<RealtimeController>(
-      init: RealtimeController(),
-      builder: (controller) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Nhận diện vật thể'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.switch_camera),
-              onPressed: controller.toggleCamera,
-            ),
-          ],
-        ),
-        body: _buildCameraView(controller),
+    final controller = Get.put(RealtimeController());
+    controller.init();
+ 
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('YOLO Real-time Detection'),
+        backgroundColor: Colors.blue,
       ),
-    );
-  }
-
-  Widget _buildCameraView(RealtimeController controller) {
-    return Obx(() {
-      if (!controller.isCameraInitialized.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          _buildCameraPreview(controller),
-          _buildDetectedClassDisplay(controller),
-        ],
-      );
-    });
-  }
-
-  Widget _buildCameraPreview(RealtimeController controller) {
-    return Center(
-      child: AspectRatio(
-        aspectRatio: controller.cameraController!.value.aspectRatio,
-        child: CameraPreview(controller.cameraController!),
-      ),
-    );
-  }
-
-  Widget _buildDetectedClassDisplay(RealtimeController controller) {
-    return Positioned(
-      bottom: 20,
-      left: 20,
-      right: 20,
-      child: Obx(() {
-        final detected = controller.detectedClasses;
-
-        if (detected.isEmpty) {
-          return const SizedBox(); // Không hiển thị gì nếu chưa detect
+      body: Obx(() {
+        if (!controller.isReady.value || controller.predictor == null) {
+          return const Center(child: CircularProgressIndicator());
         }
-
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: detected.map((label) {
-              return Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            }).toList(),
+ 
+        return Center(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.85,
+            child: UltralyticsYoloCameraPreview(
+              boundingBoxesColorList: const [Colors.red],
+              controller: controller.cameraController,
+              predictor: controller.predictor!,
+              onCameraCreated: () {},
+            ),
           ),
         );
       }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          controller.cameraController.toggleLensDirection();
+        },
+        child: const Icon(Icons.flip_camera_android),
+      ),
     );
   }
 }

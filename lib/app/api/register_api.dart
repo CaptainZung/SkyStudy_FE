@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import './api_config.dart';
+import 'package:skystudy/app/utils/auth_manager.dart'; // Thêm import
 
 class RegisterAPI {
   static const String baseUrl = ApiConfig.baseUrl;
@@ -40,19 +41,32 @@ class RegisterAPI {
     try {
       logger.i('Registering user - Username: $username, Email: $email');
       logger.i('Sending request to $baseUrl/register');
+
+      final token = await AuthManager.getToken();
+      final isGuest = await AuthManager.isGuest();
+      final data = {
+        'username': username,
+        'email': email,
+        'password': password,
+      };
+      if (isGuest && token != null) {
+        data['guest_token'] = token; // Gửi token của khách nếu có
+        logger.i('Including guest token in registration: $token');
+      }
+
       final response = await dio.post(
         '/register',
-        data: {
-          'username': username,
-          'email': email,
-          'password': password,
-        },
+        data: data,
       );
 
       logger.i('Register API response: statusCode=${response.statusCode}, data=${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         logger.i('User registered successfully: ${response.data}');
+        if (isGuest) {
+          await AuthManager.clearToken(); // Xóa token khách sau khi đăng ký thành công
+          logger.i('Cleared guest token after successful registration');
+        }
         return {'success': true, 'data': response.data};
       } else {
         logger.e('Registration failed: ${response.statusCode} - ${response.data}');

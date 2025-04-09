@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import 'config/theme.dart';
 import 'app/routes/app_pages.dart';
 import 'app/api/login_api.dart';
-import 'app/utils/onboarding_manager.dart'; // Đổi sang đường dẫn đúng của OnboardingManager
+import 'app/utils/onboarding_manager.dart';
+import 'app/utils/sound_manager.dart'; // Thêm import cho SoundManager
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SoundManager.init(); // Khởi tạo SoundManager để preload và phát nhạc nền
   runApp(const SkyStudyApp());
 }
 
@@ -20,9 +22,9 @@ class SkyStudyApp extends StatelessWidget {
     if (!hasSeenOnboarding) {
       return Routes.onboard;
     } else if (isLoggedIn) {
-      return Routes.home; 
+      return Routes.home;
     } else {
-      return Routes.login; 
+      return Routes.login;
     }
   }
 
@@ -53,7 +55,7 @@ class SkyStudyApp extends StatelessWidget {
           showPerformanceOverlay: false,
           title: 'SkyStudy',
           theme: appTheme(),
-          initialRoute: Routes.detection,
+          initialRoute: Routes.realtime, 
           getPages: AppPages.routes,
         );
       },

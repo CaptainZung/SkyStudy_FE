@@ -1,26 +1,25 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
-// import 'package:get/get.dart';
-// import 'package:skystudy/app/routes/app_pages.dart';
 
 class AuthManager {
   static const String _tokenKey = 'access_token';
   static const String _tokenExpiryKey = 'token_expiry';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _isGuestKey = 'is_guest'; // Thêm key để lưu trạng thái khách
   static final Logger logger = Logger();
 
-  static Future<void> saveToken(String? token, int expiryInSeconds) async {
+  static Future<void> saveToken(String? token, int expiryInSeconds, {bool isGuest = false}) async {
     if (token == null) {
       logger.e('Cannot save null token');
       throw Exception('Cannot save null token');
     }
     try {
-      logger.i('Saving token: $token');
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_tokenKey, token);
       final expiryTime = DateTime.now().add(Duration(seconds: expiryInSeconds));
       await prefs.setString(_tokenExpiryKey, expiryTime.toIso8601String());
-      logger.i('Token saved, expiry: ${expiryTime.toIso8601String()}');
+      await prefs.setBool(_isGuestKey, isGuest); // Lưu trạng thái isGuest
+      logger.i('Token saved, expiry: ${expiryTime.toIso8601String()}, isGuest: $isGuest');
     } catch (e) {
       logger.e('Error saving token: $e');
       rethrow;
@@ -56,6 +55,11 @@ class AuthManager {
     return refreshToken;
   }
 
+  static Future<bool> isGuest() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isGuestKey) ?? false; // Mặc định là false nếu không có giá trị
+  }
+
   static Future<bool> isTokenValid() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
@@ -89,6 +93,7 @@ class AuthManager {
       await prefs.remove(_tokenKey);
       await prefs.remove(_tokenExpiryKey);
       await prefs.remove(_refreshTokenKey);
+      await prefs.remove(_isGuestKey); // Xóa trạng thái isGuest
       logger.i('Token cleared');
     } catch (e) {
       logger.e('Error clearing token: $e');

@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   tflite_flutter: ^0.11.0
+  path: ^1.8.0 # Thư viện path để xử lý đường dẫn file
+  ultralytics_yolo: ^0.0.3 # Thư viện YOLOv8
   async: ^2.11.0
   camera: ^0.11.1 
   permission_handler: ^11.0.1
@@ -28,6 +30,9 @@ dependencies:
   http : ^1.2.2
   audioplayers: ^5.2.1
   flutter_sound: ^9.2.13
+  google_fonts: ^6.2.1
+  file_picker: ^8.1.2
+  image_picker: ^1.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,5 +56,8 @@ flutter:
     - assets/yolo11n_float16.tflite
     - assets/yolo11n_float32.tflite
     - assets/yolov2_tiny.tflite
-    - assets/yolov2_tiny.txt
+    - assets/labels.txt
     - assets/efficientdet_lite0.tflite
+    - assets/yolov8n_float16.tflite
+    - assets/yolov8n_float32.tflite
+    - assets/metadata.yaml

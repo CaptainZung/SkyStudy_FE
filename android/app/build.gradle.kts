@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.skystudy"
-        minSdkVersion(24) // Sửa thành cú pháp Kotlin: minSdkVersion(24)
+        minSdkVersion(26) // Sửa thành cú pháp Kotlin: minSdkVersion(24)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

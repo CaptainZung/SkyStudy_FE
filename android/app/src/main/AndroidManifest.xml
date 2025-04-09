@@ -12,6 +12,7 @@
 
     <application
         android:enableOnBackInvokedCallback="true"
+        android:requestLegacyExternalStorage="true"
         android:label="skystudy"
         android:hardwareAccelerated="false"
         android:name="${applicationName}"

@@ -65,92 +65,86 @@ class AuthAPI {
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    try {
-      final response = await dio.post('/login', data: {'email': email, 'password': password});
-      logger.i('Response: ${response.statusCode} - ${response.data}');
+  try {
+    final response = await dio.post('/login', data: {'email': email, 'password': password});
+    logger.i('Response: ${response.statusCode} - ${response.data}');
 
-      if (response.statusCode == 200) {
-        final data = response.data['data'];
-        if (data == null) {
-          logger.e('Response data is null');
-          return {'success': false, 'message': 'Response data is missing'};
-        }
-        final accessToken = data['access_token']?.toString();
-        if (accessToken == null) {
-          logger.e('Access token is null');
-          return {'success': false, 'message': 'Access token is missing'};
-        }
-        final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600; // Mặc định 1 giờ nếu không có expiresIn
-        await AuthManager.saveToken(accessToken, expiryInSeconds);
-        if (data['refresh_token'] != null) {
-          await AuthManager.saveRefreshToken(data['refresh_token']);
-        }
-        _accessToken = accessToken;
-        logger.i('User logged in successfully: ${response.data}');
-        return {'success': true, 'data': data};
-      } else {
-        logger.e('Login failed: ${response.statusCode} - ${response.data}');
-        return {'success': false, 'message': 'Login failed: ${response.data}'};
+    if (response.statusCode == 200) {
+      final data = response.data['data'];
+      if (data == null) {
+        logger.e('Response data is null');
+        return {'success': false, 'message': 'Response data is missing'};
       }
-    } on DioException catch (e) {
-      logger.e('DioException: ${e.message}, Response: ${e.response?.data}');
-      if (e.response != null) {
-        return {
-          'success': false,
-          'message': e.response?.data['message']?.toString() ?? 'Email hoặc mật khẩu không đúng'
-        };
-      } else {
-        return {'success': false, 'message': 'Không thể kết nối đến server'};
+      final accessToken = data['access_token']?.toString();
+      if (accessToken == null) {
+        logger.e('Access token is null');
+        return {'success': false, 'message': 'Access token is missing'};
       }
-    } catch (e) {
-      logger.e('Unexpected error during login: $e');
-      return {'success': false, 'message': 'Lỗi không xác định: ${e.toString()}'};
+      final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600;
+      await AuthManager.saveToken(accessToken, expiryInSeconds, isGuest: false); // Không phải khách
+      if (data['refresh_token'] != null) {
+        await AuthManager.saveRefreshToken(data['refresh_token']);
+      }
+      _accessToken = accessToken;
+      logger.i('User logged in successfully: ${response.data}');
+      return {'success': true, 'data': data};
+    } else {
+      logger.e('Login failed: ${response.statusCode} - ${response.data}');
+      return {'success': false, 'message': 'Login failed: ${response.data}'};
+    }
+  } on DioException catch (e) {
+    logger.e('DioException: ${e.message}, Response: ${e.response?.data}');
+    if (e.response != null) {
+      return {
+        'success': false,
+        'message': e.response?.data['message']?.toString() ?? 'Email hoặc mật khẩu không đúng'
+      };
+    } else {
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
     }
   }
+}
 
-  Future<Map<String, dynamic>> loginAsGuest() async {
-    try {
-      final response = await dio.post('/loginGuest');
-      logger.i('Guest Login Response: ${response.statusCode} - ${response.data}');
+Future<Map<String, dynamic>> loginAsGuest() async {
+  try {
+    final response = await dio.post('/loginGuest');
+    logger.i('Guest Login Response: ${response.statusCode} - ${response.data}');
 
-      if (response.statusCode == 200) {
-        final data = response.data['data'];
-        if (data == null) {
-          logger.e('Guest login response data is null');
-          return {'success': false, 'message': 'Response data is missing'};
-        }
-        final accessToken = data['access_token']?.toString();
-        if (accessToken == null) {
-          logger.e('Guest access token is null');
-          return {'success': false, 'message': 'Access token is missing'};
-        }
-        final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600; // Mặc định 1 giờ nếu không có expiresIn
-        await AuthManager.saveToken(accessToken, expiryInSeconds);
-        if (data['refresh_token'] != null) {
-          await AuthManager.saveRefreshToken(data['refresh_token']);
-        }
-        _accessToken = accessToken;
-        logger.i('Guest logged in successfully: ${response.data}');
-        return {'success': true, 'data': data};
-      } else {
-        logger.e('Guest login failed: ${response.statusCode} - ${response.data}');
-        return {'success': false, 'message': 'Guest login failed: ${response.data}'};
+    if (response.statusCode == 200) {
+      final data = response.data['data'];
+      if (data == null) {
+        logger.e('Guest login response data is null');
+        return {'success': false, 'message': 'Response data is missing'};
       }
-    } on DioException catch (e) {
-      logger.e('DioException during guest login: ${e.message}, Response: ${e.response?.data}');
-      if (e.response != null) {
-        return {
-          'success': false,
-          'message': e.response?.data['message']?.toString() ?? 'Không thể đăng nhập với tư cách khách'
-        };
-      } else {
-        return {'success': false, 'message': 'Không thể kết nối đến server'};
+      final accessToken = data['access_token']?.toString();
+      if (accessToken == null) {
+        logger.e('Guest access token is null');
+        return {'success': false, 'message': 'Access token is missing'};
       }
-    } catch (e) {
-      logger.e('Unexpected error during guest login: $e');
-      return {'success': false, 'message': 'Lỗi không xác định: ${e.toString()}'};
+      final expiryInSeconds = data['expiresIn']?.toInt() ?? 3600;
+      await AuthManager.saveToken(accessToken, expiryInSeconds, isGuest: true); // Là khách
+      if (data['refresh_token'] != null) {
+        await AuthManager.saveRefreshToken(data['refresh_token']);
+      }
+      _accessToken = accessToken;
+      logger.i('Guest logged in successfully: ${response.data}');
+      return {'success': true, 'data': data};
+    } else {
+      logger.e('Guest login failed: ${response.statusCode} - ${response.data}');
+      return {'success': false, 'message': 'Guest login failed: ${response.data}'};
+    }
+  } on DioException catch (e) {
+    logger.e('DioException during guest login: ${e.message}, Response: ${e.response?.data}');
+    if (e.response != null) {
+      return {
+        'success': false,
+        'message': e.response?.data['message']?.toString() ?? 'Không thể đăng nhập với tư cách khách'
+      };
+    } else {
+      return {'success': false, 'message': 'Không thể kết nối đến server'};
     }
   }
+}
 
   Future<String?> _refreshAccessToken() async {
     if (_isRefreshing) {
