@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:skystudy/app/modules/global_widgets/appbar.dart';
-import 'package:google_fonts/google_fonts.dart';
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
@@ -15,6 +14,14 @@ class AboutUsPage extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
+              _buildMemberCard(
+                imagePath: 'assets/images/man.png',
+                quote:
+                    'Tôi rất hạnh phúc khi được làm mentor cho một nhóm giỏi như này.Mong các em sẽ thành công trong tương lai',
+                role: 'Mentor',
+                name: 'Nguyễn Đức Mận',
+                isReversed: true,
+              ),
               _buildMemberCard(
                 imagePath: 'assets/images/khai.png',
                 quote:

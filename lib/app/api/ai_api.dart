@@ -1,6 +1,7 @@
 class ApiConfig {
-  static const String baseHttpUrl = 'https://c961-14-236-18-153.ngrok-free.app';
-  static const String baseWsUrl = 'wss://c961-14-236-18-153.ngrok-free.app';
+  static const String url = '968a-118-69-62-145.ngrok-free.app';
+  static const String baseHttpUrl = 'https://$url';
+  static const String baseWsUrl = 'wss://$url';
   
 
   static const String predictEndpoint = '$baseHttpUrl/predict';

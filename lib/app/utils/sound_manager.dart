@@ -1,7 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
+import 'package:get/get.dart';
+
 class SoundManager {
   static final Logger logger = Logger();
   static final AudioPlayer _buttonPlayer = AudioPlayer();
@@ -17,6 +18,12 @@ class SoundManager {
     _buttonVolume = prefs.getDouble('button_volume') ?? 1.0;
     _musicVolume = prefs.getDouble('music_volume') ?? 1.0;
     _currentMusicIndex = prefs.getInt('current_music_index') ?? 0;
+
+    // Đảm bảo âm lượng nhạc không bị tắt hoàn toàn khi khởi tạo
+    if (_musicVolume == 0.0) {
+      _musicVolume = 0.5; // Đặt mức mặc định nếu bị tắt
+      await prefs.setDouble('music_volume', _musicVolume);
+    }
 
     // Thiết lập âm lượng ban đầu
     logger.i('Button volume: $_buttonVolume');
@@ -43,6 +50,8 @@ class SoundManager {
       logger.i('Button sound preloaded successfully');
     } catch (e) {
       logger.e('Error preloading button sound: $e');
+      Get.snackbar('Lỗi', 'Không thể tải âm thanh nút: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -81,6 +90,8 @@ class SoundManager {
       logger.i('Button sound played');
     } catch (e) {
       logger.e('Error playing button sound: $e');
+      Get.snackbar('Lỗi', 'Không thể phát âm thanh nút: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -94,11 +105,17 @@ class SoundManager {
       );
     } catch (e) {
       logger.e('Error playing music: $e');
+      Get.snackbar('Lỗi', 'Không thể phát nhạc nền: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
   static Future<void> stopMusic() async {
-    await _musicPlayer.stop();
-    logger.i('Music stopped');
+    try {
+      await _musicPlayer.stop();
+      logger.i('Music stopped');
+    } catch (e) {
+      logger.e('Error stopping music: $e');
+    }
   }
 }

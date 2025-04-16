@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:skystudy/app/api/register_api.dart';
+import 'package:skystudy/app/modules/auth/register_service.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 // import 'package:skystudy/app/modules/global_widgets/lottie_popup.dart';
 import 'package:logger/logger.dart';

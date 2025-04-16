@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_tts: ^4.2.2
   tflite_flutter: ^0.11.0
   path: ^1.8.0 # Thư viện path để xử lý đường dẫn file
   ultralytics_yolo: ^0.0.3 # Thư viện YOLOv8
@@ -33,6 +34,7 @@ dependencies:
   google_fonts: ^6.2.1
   file_picker: ^8.1.2
   image_picker: ^1.1.2
+  speech_to_text: ^7.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,11 +55,9 @@ flutter:
     - assets/icons/
     - assets/audio/
     - assets/lottie/
-    - assets/yolo11n_float16.tflite
-    - assets/yolo11n_float32.tflite
-    - assets/yolov2_tiny.tflite
     - assets/labels.txt
     - assets/efficientdet_lite0.tflite
+    - assets/yolov8n_int8.tflite
     - assets/yolov8n_float16.tflite
     - assets/yolov8n_float32.tflite
     - assets/metadata.yaml

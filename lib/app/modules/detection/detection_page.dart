@@ -20,7 +20,7 @@ class DetectionPage extends StatelessWidget {
           appBar: const CustomAppBar(
             title: 'Detection',
             backgroundColor: Colors.blue,
-            showBackButton: true,
+            showBackButton: false,
           ),
           body: Stack(
             children: [

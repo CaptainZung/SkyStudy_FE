@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.skystudy"
-        minSdkVersion(26) // Sửa thành cú pháp Kotlin: minSdkVersion(24)
+        minSdkVersion(26)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -29,11 +29,16 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug") // Hoặc dùng release nếu có
         }
     }
+
     ndkVersion = "29.0.13113456"
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Color backgroundColor;
@@ -24,18 +25,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       backgroundColor: backgroundColor,
-      leading: showBackButton
-          ? IconButton(
-                        icon: Image.asset(
-                    'assets/icons/back.png',
-                    width: 50, // Kích thước phù hợp cho icon
-                    height: 50,
-                  ),
-              onPressed: () {
-                Get.back();
-              },
-            )
-          : null,
+      leading:
+          showBackButton
+              ? IconButton(
+                icon: Image.asset(
+                  'assets/icons/back.png',
+                  width: 50, // Kích thước phù hợp cho icon
+                  height: 50,
+                ),
+                onPressed: () {
+                  Get.back();
+                },
+              )
+              : null,
       elevation: 0,
     );
   }

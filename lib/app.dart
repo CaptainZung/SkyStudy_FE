@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'config/theme.dart';
 import 'app/routes/app_pages.dart';
-import 'app/api/login_api.dart';
+import 'app/modules/auth/login_service.dart';
 import 'app/utils/onboarding_manager.dart';
 import 'app/utils/sound_manager.dart'; // Thêm import cho SoundManager
 
@@ -55,7 +55,7 @@ class SkyStudyApp extends StatelessWidget {
           showPerformanceOverlay: false,
           title: 'SkyStudy',
           theme: appTheme(),
-          initialRoute: Routes.realtime, 
+          initialRoute: Routes.login, 
           getPages: AppPages.routes,
         );
       },

@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter_sound/flutter_sound.dart' as flutter_sound;
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart'; // Required for MediaType
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skystudy/app/api/ai_api.dart';
 
@@ -33,7 +34,7 @@ class PronunciationCheckController extends GetxController {
     final Map<String, dynamic> args = Get.arguments ?? {};
     sampleSentence = args['sampleSentence']?.toString() ?? '';
     if (sampleSentence.isNotEmpty) {
-      fetchAudio(); // Gọi ngay khi khởi tạo để lấy âm thanh mẫu
+      fetchAudio();
     }
   }
 
@@ -45,7 +46,6 @@ class PronunciationCheckController extends GetxController {
     await _recorder!.setSubscriptionDuration(Duration(milliseconds: 10));
   }
 
-  // Thêm hàm fetchAudio từ AISpeechController
   Future<void> fetchAudio() async {
     try {
       String cleanSentence = sampleSentence.replaceAll(RegExp(r'[^\w\s]'), '').trim();
@@ -54,7 +54,7 @@ class PronunciationCheckController extends GetxController {
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({
           'word': cleanSentence,
-          'voice': 'female', // Giọng mặc định, bạn có thể thêm logic chọn giọng nếu cần
+          'voice': 'female',
         }),
       );
 
@@ -103,8 +103,15 @@ class PronunciationCheckController extends GetxController {
     try {
       final audioWithHeader = addWavHeader(_recordedAudioBytes!, 44100, 1, 16);
       var request = http.MultipartRequest('POST', Uri.parse(ApiConfig.pronunciationCheckEndpoint));
-      request.files.add(http.MultipartFile.fromBytes('file', audioWithHeader, filename: 'pronunciation_check.wav'));
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        audioWithHeader,
+        filename: 'pronunciation_check.wav',
+        contentType: MediaType('audio', 'wav'), // Corrected MediaType usage
+      ));
       request.fields['sample_sentence'] = sampleSentence;
+
+      print("Gửi sample_sentence: $sampleSentence"); // Log để kiểm tra
 
       final response = await request.send();
       final responseData = await response.stream.bytesToString();
@@ -115,8 +122,12 @@ class PronunciationCheckController extends GetxController {
         accuracy.value = (data['accuracy'] ?? 0.0).toDouble();
         pronunciationFeedback.value = data['pronunciation_feedback'] ?? '';
         ttsAudioBase64.value = data['tts_audio_base64'] ?? '';
+      } else {
+        print("Lỗi server: ${response.statusCode} - $responseData"); // Log lỗi chi tiết
+        Get.snackbar('Lỗi', 'Kiểm tra phát âm thất bại: $responseData');
       }
     } catch (e) {
+      print("Lỗi client: $e");
       Get.snackbar('Lỗi', 'Lỗi khi kiểm tra phát âm: $e');
     } finally {
       isProcessing.value = false;
@@ -125,7 +136,7 @@ class PronunciationCheckController extends GetxController {
 
   Future<void> playSampleSentenceAudio() async {
     if (sampleSentenceAudioBase64.value.isEmpty) {
-      await fetchAudio(); // Lấy lại nếu chưa có
+      await fetchAudio();
     }
     if (sampleSentenceAudioBase64.value.isNotEmpty) {
       try {
@@ -171,7 +182,6 @@ class PronunciationCheckController extends GetxController {
   }
 
   Uint8List addWavHeader(List<int> pcmData, int sampleRate, int numChannels, int bitsPerSample) {
-    // Giữ nguyên hàm này như trong code gốc
     final byteLength = pcmData.length;
     final totalLength = byteLength + 44 - 8;
     final byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;

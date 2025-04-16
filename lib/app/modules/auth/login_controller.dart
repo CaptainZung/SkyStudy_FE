@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:skystudy/app/api/login_api.dart';
+import 'package:skystudy/app/modules/auth/login_service.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';

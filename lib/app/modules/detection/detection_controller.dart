@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:skystudy/app/api/ai_api.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
+import 'package:logger/logger.dart';
+
 
 class DetectionController extends GetxController {
   var isCameraInitialized = false.obs;
@@ -16,6 +18,7 @@ class DetectionController extends GetxController {
   var processedImageBase64 = ''.obs;
   var showProcessedImage = false.obs;
   var isLoading = false.obs;
+  final Logger logger = Logger();
 
   List<CameraDescription> cameras = [];
   int selectedCameraIndex = 0;
@@ -37,7 +40,7 @@ class DetectionController extends GetxController {
 
     if (status.isPermanentlyDenied) {
       errorMessage.value = 'Quyền truy cập camera bị từ chối vĩnh viễn. Vui lòng bật quyền trong cài đặt.';
-      print('Camera permission permanently denied');
+      logger.e('Camera permission permanently denied');
       return;
     }
 
@@ -45,11 +48,11 @@ class DetectionController extends GetxController {
       cameras = await availableCameras();
       if (cameras.isEmpty) {
         errorMessage.value = 'Không tìm thấy camera trên thiết bị này.';
-        print('No cameras found on this device');
+        logger.e('No cameras found on this device');
         return;
       }
 
-      print('Found ${cameras.length} cameras');
+      logger.i('Found ${cameras.length} cameras');
       selectedCameraIndex = 0;
       cameraController = CameraController(
         cameras[selectedCameraIndex],
@@ -57,14 +60,14 @@ class DetectionController extends GetxController {
         enableAudio: false,
       );
 
-      print('Initializing camera...');
+      logger.i('Initializing camera...');
       await cameraController!.initialize();
-      print('Camera initialized successfully');
+      logger.i('Camera initialized successfully');
       isCameraInitialized.value = true;
       update();
     } catch (e) {
       errorMessage.value = 'Lỗi khi khởi tạo camera: $e';
-      print('Error initializing camera: $e');
+      logger.e('Error initializing camera: $e');
     }
   }
 
@@ -103,7 +106,7 @@ class DetectionController extends GetxController {
   Future<void> captureAndPredict() async {
     if (cameraController == null || !cameraController!.value.isInitialized) {
       Get.snackbar('Lỗi', 'Camera chưa được khởi tạo.');
-      print('Camera not initialized');
+      logger.e('Camera not initialized');
       return;
     }
 
@@ -111,26 +114,26 @@ class DetectionController extends GetxController {
       isLoading.value = true;
       update();
 
-      print('Chụp ảnh...');
+      logger.i('Chụp ảnh...');
       final image = await cameraController!.takePicture();
-      print('Ảnh đã chụp: ${image.path}');
+      logger.i('Ảnh đã chụp: ${image.path}');
       final file = File(image.path);
 
       if (!file.existsSync()) {
         Get.snackbar('Lỗi', 'Không thể tìm thấy file ảnh đã chụp.');
-        print('File ảnh không tồn tại: ${image.path}');
+        logger.e('File ảnh không tồn tại: ${image.path}');
         return;
       }
 
       final fileSize = await file.length();
-      print('Kích thước file ảnh: $fileSize bytes');
+      logger.i('Kích thước file ảnh: $fileSize bytes');
       if (fileSize == 0) {
         Get.snackbar('Lỗi', 'File ảnh rỗng. Vui lòng thử lại.');
-        print('File ảnh rỗng');
+        logger.e('File ảnh rỗng');
         return;
       }
 
-      print('Chuẩn bị gửi ảnh lên server...');
+      logger.i('Chuẩn bị gửi ảnh lên server...');
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
           file.path,
@@ -139,7 +142,7 @@ class DetectionController extends GetxController {
         ),
       });
 
-      print('Gửi request tới ${ApiConfig.predictEndpoint}');
+      logger.i('Gửi request tới ${ApiConfig.predictEndpoint}');
       final response = await dio.post(
         ApiConfig.predictEndpoint,
         data: formData,
@@ -150,27 +153,27 @@ class DetectionController extends GetxController {
         ),
       ).catchError((error) {
         if (error is DioException && error.response != null) {
-          print('Lỗi từ server: ${error.response!.statusCode} - ${error.response!.data}');
+          logger.e('Lỗi từ server: ${error.response!.statusCode} - ${error.response!.data}');
           Get.snackbar('Lỗi từ server', 'Mã lỗi: ${error.response!.statusCode}\nChi tiết: ${error.response!.data}');
         } else {
-          print('Lỗi không xác định: $error');
+          logger.e('Lỗi không xác định: $error');
           Get.snackbar('Lỗi', 'Không thể kết nối tới server: $error');
         }
         throw error;
       });
 
-      print('Nhận response từ server: ${response.statusCode}');
+      logger.i('Nhận response từ server: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = response.data;
-        print('Dữ liệu từ server: $data');
+        logger.i('Dữ liệu từ server: $data');
 
         if (data['predictions'] != null && data['predictions'] is List) {
           detectedObjects.clear();
           detectedObjects.addAll(List<Map<String, dynamic>>.from(data['predictions']));
           processedImageBase64.value = data['image']?.toString() ?? '';
           showProcessedImage.value = true;
-          print('Đã cập nhật detectedObjects: ${detectedObjects.length} đối tượng');
-          print('Điều hướng sang DetectionResultPage...');
+          logger.i('Đã cập nhật detectedObjects: ${detectedObjects.length} đối tượng');
+          logger.i('Điều hướng sang DetectionResultPage...');
           Get.toNamed(
             Routes.detectionresult,
             arguments: {
@@ -180,14 +183,14 @@ class DetectionController extends GetxController {
           );
         } else {
           Get.snackbar('Lỗi', 'Không tìm thấy predictions trong response từ server.');
-          print('Không tìm thấy predictions trong response');
+          logger.e('Không tìm thấy predictions trong response');
         }
       } else {
         Get.snackbar('Lỗi', 'Không thể nhận dạng: ${response.statusCode}');
-        print('Lỗi nhận dạng: ${response.statusCode} - ${response.data}');
+        logger.e('Lỗi nhận dạng: ${response.statusCode} - ${response.data}');
       }
     } catch (e) {
-      print('Lỗi trong captureAndPredict: $e');
+      logger.e('Lỗi trong captureAndPredict: $e');
       Get.snackbar('Lỗi', 'Lỗi trong quá trình chụp và nhận diện: $e');
     } finally {
       isLoading.value = false;
@@ -198,13 +201,13 @@ class DetectionController extends GetxController {
   Future<void> disposeCamera() async {
     try {
       if (cameraController != null) {
-        print('Bắt đầu dispose camera...');
+        logger.i('Bắt đầu dispose camera...');
         if (cameraController!.value.isStreamingImages) {
-          print('Dừng stream hình ảnh...');
+          logger.i('Dừng stream hình ảnh...');
           await cameraController!.stopImageStream();
         }
         if (cameraController!.value.isInitialized) {
-          print('Dispose camera controller...');
+          logger.i('Dispose camera controller...');
           await cameraController!.dispose();
         }
         cameraController = null;
@@ -213,20 +216,21 @@ class DetectionController extends GetxController {
         detectedObjects.clear();
         processedImageBase64.value = '';
         update();
-        print('Camera đã được dispose thành công');
+        logger.i('Camera đã được dispose thành công');
       } else {
-        print('CameraController đã là null, không cần dispose');
+        logger.i('CameraController đã là null, không cần dispose');
       }
     } catch (e) {
-      print('Lỗi khi dispose camera: $e');
+      logger.e('Lỗi khi dispose camera: $e');
       Get.snackbar('Lỗi', 'Không thể giải phóng camera: $e');
     }
   }
 
   void navigateToRealtime() {
-    print('Chuyển sang RealtimePage...');
+    logger.e('Chuyển sang RealtimePage...');
     disposeCamera().then((_) {
-      Get.offNamed(Routes.realtime);
+      // Get.offNamed(Routes.realtime);
+      Get.toNamed(Routes.realtime);
     });
   }
 
@@ -244,7 +248,7 @@ class DetectionController extends GetxController {
     cameraController?.dispose();
     cameraController = null;
     detectedObjects.clear();
-    print('DetectionController onClose');
+    logger.i('DetectionController onClose');
     super.onClose();
   }
 }

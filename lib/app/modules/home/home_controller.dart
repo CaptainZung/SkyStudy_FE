@@ -1,11 +1,45 @@
 import 'package:get/get.dart';
-import 'package:skystudy/app/api/login_api.dart';
+import 'package:skystudy/app/modules/auth/login_service.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeController extends GetxController {
+  final topics = [
+    'Animal',
+    'Family',
+    'Fruits',
+    'Foods',
+    'Career',
+    'School',
+    'Sport',
+    'Body Part',
+  ];
+
   final AuthAPI authAPI = AuthAPI();
   final Logger logger = Logger();
+
+  RxMap<String, int> topicProgress = <String, int>{}.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadProgress();
+  }
+
+  Future<void> loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (var topic in topics) {
+      final progress = prefs.getInt('progress_$topic') ?? 1;
+      topicProgress[topic] = progress;
+    }
+  }
+
+  Future<void> saveProgress(String topic, int node) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('progress_$topic', node);
+    topicProgress[topic] = node;
+  }
 
   Future<void> logout() async {
     try {
@@ -32,4 +66,5 @@ class HomeController extends GetxController {
       logger.e('Error fetching profile: $e');
     }
   }
+
 }

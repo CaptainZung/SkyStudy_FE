@@ -100,4 +100,6 @@ class AuthManager {
       rethrow;
     }
   }
+
+  static getUserId() {}
 }

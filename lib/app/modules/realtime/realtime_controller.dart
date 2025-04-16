@@ -1,4 +1,6 @@
 import 'dart:io' as io;
+import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
@@ -14,11 +16,48 @@ class RealtimeController extends GetxController {
   final double confidence = 0.5;
   final double iou = 0.5;
   final int inputSize = 640;
- 
+
+  final List<Color> boundingBoxesColorList = [
+    Colors.lightBlueAccent,
+    Colors.red,
+    Colors.green,
+    Colors.yellow,
+    Colors.purple,
+    Colors.orange,
+    Colors.cyan,
+    Colors.pink,
+    Colors.brown,
+    Colors.teal,
+    Colors.indigo,
+    Colors.amber,
+    Colors.lime,
+    Colors.deepOrange,
+    Colors.lightGreen,
+    Colors.deepPurple,
+    Colors.lightBlue,
+    Colors.black,
+  ];
+
+  late final List<Color> randomBoundingBoxColors;
  
   ObjectDetector? predictor;
   var isReady = false.obs;
  
+  @override
+  void onInit() {
+    super.onInit();
+    // Khởi tạo danh sách màu ngẫu nhiên
+    _initRandomColors();
+  }
+
+  void _initRandomColors() {
+    final random = Random();
+    randomBoundingBoxColors = List.generate(
+      boundingBoxesColorList.length,
+      (index) => boundingBoxesColorList[random.nextInt(boundingBoxesColorList.length)],
+    );
+  }
+
   Future<void> init() async {
     if (isReady.value) return; // tránh init lại nhiều lần
  
