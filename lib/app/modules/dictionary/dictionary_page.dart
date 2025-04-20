@@ -1,9 +1,11 @@
+// lib/app/modules/dictionary/dictionary_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:skystudy/app/modules/dictionary/dictionary_controller.dart';
 import 'package:skystudy/app/modules/dictionary/dictionary_model.dart';
 import '../global_widgets/bottom_navbar.dart';
 import 'WordDetailScreen.dart';
+import 'your_dictionary_page.dart'; // Import YourDictionaryPage
 
 class DictionaryPage extends StatefulWidget {
   const DictionaryPage({super.key});
@@ -12,8 +14,11 @@ class DictionaryPage extends StatefulWidget {
   State<DictionaryPage> createState() => _DictionaryPageState();
 }
 
-class _DictionaryPageState extends State<DictionaryPage> {
+class _DictionaryPageState extends State<DictionaryPage>
+    with SingleTickerProviderStateMixin { // Thêm mixin để dùng TabController
   bool _showSearch = false;
+  late TabController _tabController; // Khai báo TabController
+
   final topicDescriptions = {
     'Family': 'Gia đình',
     'Animal': 'Động vật',
@@ -26,22 +31,34 @@ class _DictionaryPageState extends State<DictionaryPage> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this); // Khởi tạo TabController với 2 tab
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose(); // Hủy TabController khi widget bị hủy
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final DictionaryController controller = Get.put(DictionaryController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFC8E5EB), // Màu nền C8E5EB
+      backgroundColor: const Color(0xFFC8E5EB),
       appBar: AppBar(
         title: const Text(
           'TỪ ĐIỂN',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white, // Chữ màu trắng
+            color: Colors.white,
             fontSize: 20,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF2277B4), // Màu AppBar 2277B4
+        backgroundColor: const Color(0xFF2277B4),
         elevation: 5,
         actions: [
           IconButton(
@@ -51,6 +68,16 @@ class _DictionaryPageState extends State<DictionaryPage> {
             },
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(text: 'TỪ ĐIỂN'),
+            Tab(text: 'TỪ ĐIỂN CỦA TÔI'),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -58,7 +85,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: _showSearch ? 70 : 0,
-            padding: _showSearch 
+            padding: _showSearch
                 ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
                 : EdgeInsets.zero,
             decoration: BoxDecoration(
@@ -89,185 +116,192 @@ class _DictionaryPageState extends State<DictionaryPage> {
                   )
                 : null,
           ),
-          
-          // Main content
+          // TabBarView để hiển thị nội dung của từng tab
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2277B4)),
-                  ),
-                );
-              } else if (controller.errorMessage.isNotEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 50, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Lỗi: ${controller.errorMessage}',
-                        style: const TextStyle(fontSize: 16, color: Colors.red),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: controller.refreshData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2277B4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        ),
-                        child: const Text('Thử lại', 
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                );
-              } else if (controller.filteredWords == null || 
-                        controller.filteredWords!.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.search_off, size: 50, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Không tìm thấy từ vựng',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: controller.refreshData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2277B4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: const Text('Làm mới', 
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              
-              return RefreshIndicator(
-                onRefresh: controller.refreshData,
-                color: const Color(0xFF2277B4),
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  itemCount: controller.filteredWords!.keys.length,
-                  itemBuilder: (context, index) {
-                    String topic = controller.filteredWords!.keys.elementAt(index);
-                    List<Dictionary> words = controller.filteredWords![topic]!;
-                    
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Topic header
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF2277B4), // Màu header 2277B4
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(12)),
-                              ),
-                              child: Text(
-                                '$topic: ${topicDescriptions[topic] ?? 'Chưa có mô tả'}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            
-                            // Words list
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                children: words.map((word) => _buildWordItem(word)).toList(),
-                              ),
-                            ),
-                            
-                            // View more button
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 16, right: 16, bottom: 16),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    try {
-                                      final words = await controller.fetchWordByTopic(topic);
-                                      Get.to(
-                                        () => WordDetailScreen(
-                                          topic: topic,
-                                          words: words,
-                                        ),
-                                        transition: Transition.rightToLeft,
-                                      );
-                                    } catch (e) {
-                                      Get.snackbar(
-                                        'Lỗi',
-                                        'Không thể tải từ vựng cho chủ đề $topic: $e',
-                                        snackPosition: SnackPosition.BOTTOM,
-                                        backgroundColor: Colors.red,
-                                        colorText: Colors.white,
-                                        borderRadius: 10,
-                                        margin: const EdgeInsets.all(10),
-                                      );
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: const Color(0xFF2277B4),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(
-                                        color: Color(0xFF2277B4), width: 1),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                  ),
-                                  child: const Text('XEM THÊM TỪ VỰNG'),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            }),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: DictionaryPage content (giữ nguyên nội dung hiện tại)
+                _buildDictionaryContent(controller),
+                // Tab 2: YourDictionaryPage
+                YourDictionaryPage(), // Thay thế bằng YourDictionaryPage
+              ],
+            ),
           ),
         ],
       ),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
     );
+  }
+
+  // Tách nội dung DictionaryPage thành một phương thức riêng để tái sử dụng
+  Widget _buildDictionaryContent(DictionaryController controller) {
+    return Obx(() {
+      if (controller.isLoading) {
+        return const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2277B4)),
+          ),
+        );
+      } else if (controller.errorMessage.isNotEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 50, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Lỗi: ${controller.errorMessage}',
+                style: const TextStyle(fontSize: 16, color: Colors.red),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: controller.refreshData,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2277B4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12),
+                ),
+                child: const Text('Thử lại',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+      } else if (controller.filteredWords == null ||
+          controller.filteredWords!.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.search_off, size: 50, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text(
+                'Không tìm thấy từ vựng',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: controller.refreshData,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2277B4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text('Làm mới',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.refreshData,
+        color: const Color(0xFF2277B4),
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.filteredWords!.keys.length,
+          itemBuilder: (context, index) {
+            String topic = controller.filteredWords!.keys.elementAt(index);
+            List<Dictionary> words = controller.filteredWords![topic]!;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2277B4),
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12)),
+                      ),
+                      child: Text(
+                        '$topic: ${topicDescriptions[topic] ?? 'Chưa có mô tả'}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: words.map((word) => _buildWordItem(word)).toList(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 16, bottom: 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            try {
+                              final words = await controller.fetchWordByTopic(topic);
+                              Get.to(
+                                () => WordDetailScreen(
+                                  topic: topic,
+                                  words: words,
+                                ),
+                                transition: Transition.rightToLeft,
+                              );
+                            } catch (e) {
+                              Get.snackbar(
+                                'Lỗi',
+                                'Không thể tải từ vựng cho chủ đề $topic: $e',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                                borderRadius: 10,
+                                margin: const EdgeInsets.all(10),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF2277B4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(
+                                  color: Color(0xFF2277B4), width: 1),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('XEM THÊM TỪ VỰNG'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildWordItem(Dictionary word) {
@@ -328,14 +362,14 @@ class SingleWordDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFC8E5EB), // Màu nền C8E5EB
+      backgroundColor: const Color(0xFFC8E5EB),
       appBar: AppBar(
         title: Text(
           word.word,
           style: const TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF2277B4), // Màu AppBar 2277B4
+        backgroundColor: const Color(0xFF2277B4),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -343,7 +377,6 @@ class SingleWordDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Word card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -382,8 +415,6 @@ class SingleWordDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
-            // Details card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
