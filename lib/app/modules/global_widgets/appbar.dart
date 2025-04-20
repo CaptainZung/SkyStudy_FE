@@ -5,12 +5,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Color backgroundColor;
   final bool showBackButton;
+  final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.backgroundColor = Colors.blue,
     this.showBackButton = true,
+    this.bottom,
   });
 
   @override
@@ -25,23 +27,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       backgroundColor: backgroundColor,
-      leading:
-          showBackButton
-              ? IconButton(
-                icon: Image.asset(
-                  'assets/icons/back.png',
-                  width: 50, // Kích thước phù hợp cho icon
-                  height: 50,
-                ),
-                onPressed: () {
-                  Get.back();
-                },
-              )
-              : null,
+      leading: showBackButton
+          ? IconButton(
+              icon: Image.asset(
+                'assets/icons/back.png',
+                width: 50, // Kích thước phù hợp cho icon
+                height: 50,
+              ),
+              onPressed: () {
+                Get.back();
+              },
+            )
+          : null,
       elevation: 0,
+      bottom: bottom,
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 }

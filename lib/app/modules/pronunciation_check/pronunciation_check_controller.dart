@@ -5,9 +5,10 @@ import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter_sound/flutter_sound.dart' as flutter_sound;
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart'; // Required for MediaType
+import 'package:http_parser/http_parser.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skystudy/app/api/ai_api.dart';
+import 'package:skystudy/app/utils/sound_manager.dart';
 
 class PronunciationCheckController extends GetxController {
   var isRecording = false.obs;
@@ -19,6 +20,8 @@ class PronunciationCheckController extends GetxController {
   var sampleSentenceAudioBase64 = ''.obs;
   var isPlayingTts = false.obs;
   var isPlayingSampleSentence = false.obs;
+  var lottieAnimationPath = ''.obs;
+  var feedbackMessage = ''.obs;
   late String sampleSentence;
 
   flutter_sound.FlutterSoundRecorder? _recorder;
@@ -107,11 +110,11 @@ class PronunciationCheckController extends GetxController {
         'file',
         audioWithHeader,
         filename: 'pronunciation_check.wav',
-        contentType: MediaType('audio', 'wav'), // Corrected MediaType usage
+        contentType: MediaType('audio', 'wav'),
       ));
       request.fields['sample_sentence'] = sampleSentence;
 
-      print("Gửi sample_sentence: $sampleSentence"); // Log để kiểm tra
+      print("Gửi sample_sentence: $sampleSentence");
 
       final response = await request.send();
       final responseData = await response.stream.bytesToString();
@@ -122,8 +125,17 @@ class PronunciationCheckController extends GetxController {
         accuracy.value = (data['accuracy'] ?? 0.0).toDouble();
         pronunciationFeedback.value = data['pronunciation_feedback'] ?? '';
         ttsAudioBase64.value = data['tts_audio_base64'] ?? '';
+
+        lottieAnimationPath.value = accuracy.value >= 0.8 ? 'assets/lottie/dung.json' : 'assets/lottie/sai.json';
+        feedbackMessage.value = accuracy.value >= 0.8 ? 'Phát âm rất tốt!' : 'Hãy thử lại nhé!';
+
+        if (accuracy.value >= 0.8) {
+          await SoundManager.playCorrectSound();
+        } else {
+          await SoundManager.playWrongSound();
+        }
       } else {
-        print("Lỗi server: ${response.statusCode} - $responseData"); // Log lỗi chi tiết
+        print("Lỗi server: ${response.statusCode} - $responseData");
         Get.snackbar('Lỗi', 'Kiểm tra phát âm thất bại: $responseData');
       }
     } catch (e) {

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:skystudy/app/utils/auth_manager.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../home/home_controller.dart';
 
 class SettingController extends GetxController {

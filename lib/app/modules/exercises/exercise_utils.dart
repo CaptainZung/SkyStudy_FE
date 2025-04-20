@@ -13,6 +13,6 @@ String? getRouteByExercise(int exercise) {
     case 4:
       return Routes.exercise4;
     default:
-      return null;
+      return Routes.home;
   }
 }

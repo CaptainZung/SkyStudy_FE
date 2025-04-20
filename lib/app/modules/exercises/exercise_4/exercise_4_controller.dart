@@ -8,12 +8,11 @@ import 'package:logger/logger.dart';
 
 class Exercise4Controller extends GetxController {
   Rxn<Exercise4Model> lesson = Rxn<Exercise4Model>();
-  var enableContinueButton = false.obs;
+  var enableContinueButton = true.obs;
   final Logger logger = Logger();
 
   late String topic;
   late int node;
-  late int exercise;
 
   Future<void> loadLesson(String topic, int node) async {
     try {
@@ -44,19 +43,33 @@ class Exercise4Controller extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Kiểm tra xem có arguments từ HomePage không
     topic = Get.arguments?['topic'] ?? 'Animal';
     node = Get.arguments?['node'] ?? 1;
-    print('Exercise1 - topic: $topic, node: $node');
 
-    // Gọi loadLesson với topic và node mới
+    logger.i('✅ Init topic = $topic | node = $node');
+
     loadLesson(topic, node);
   }
 
-  void completeExercise() {
-    Get.snackbar('Hoàn thành', 'Bạn đã hoàn tất bài học này 🎉');
-    Get.offAllNamed(Routes.home); // Quay về trang chủ
-    node = 0; // Reset node
-    topic = ''; // Reset topic
+  void completeExercise() async {
+    // Ghi log trước khi gửi
+    logger.i('⚠️ completeExercise → topic = "$topic" | node = $node');
+
+    final String currentTopic = topic;
+    final int currentNode = node;
+
+    try {
+      await Exercise4Service.completeLesson(currentTopic, currentNode);
+      Get.snackbar('Hoàn thành', 'Bạn đã hoàn tất bài học này 🎉');
+
+      // Reset sau khi gửi thành công
+      topic = '';
+      node = 0;
+
+      Get.offAllNamed(Routes.home);
+    } catch (e) {
+      logger.e('⛔ Error completing lesson: $e');
+      Get.snackbar('Lỗi', e.toString(), snackPosition: SnackPosition.BOTTOM);
+    }
   }
 }

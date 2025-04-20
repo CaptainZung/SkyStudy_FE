@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 import '../leaderboard/leaderboard_page.dart';
+
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 
@@ -44,10 +45,14 @@ class _HomePageViewState extends State<_HomePageView>
   List<double> nodeScales = List.generate(40, (_) => 1.0);
 
   // Danh sách trạng thái cho các node (0: chưa làm, 1: đang làm, 2: đã hoàn thành)
-  List<int> nodeStatus = [];
+  List<int> nodeStatus = List.generate(40, (_) => 0); // Khởi tạo mặc định
+
+  // Biến để theo dõi trạng thái tải dữ liệu
+  bool isLoading = true;
 
   final int _points = 1000; // Điểm ảo (tạm thời)
   final Logger logger = Logger();
+
   // Danh sách các topic
   final List<String> topics = [
     'Family',
@@ -58,7 +63,7 @@ class _HomePageViewState extends State<_HomePageView>
     'Sport',
     'Body Part',
     'Career',
-  ];
+  ].reversed.toList(); // Đảo ngược danh sách để bắt đầu từ dưới lên
 
   // ScrollController để điều khiển vị trí cuộn
   late ScrollController _scrollController;
@@ -80,28 +85,47 @@ class _HomePageViewState extends State<_HomePageView>
     // Khởi tạo ScrollController
     _scrollController = ScrollController();
 
-    // Tự động cuộn xuống dưới cùng sau khi màn hình được tải
-    _scrollToBottom();
+    // Tự động cuộn lên trên cùng sau khi màn hình được tải (vì list đã đảo ngược)
+    _scrollToTop();
   }
 
   // Tải trạng thái từ SharedPreferences
   Future<void> _loadNodeStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String>? savedStatus = prefs.getStringList('nodeStatus');
-    if (savedStatus != null && savedStatus.length == 40) {
-      setState(() {
-        nodeStatus = savedStatus.map((e) => int.parse(e)).toList();
-      });
-    } else {
-      // Nếu không có trạng thái đã lưu, khởi tạo mặc định
-      setState(() {
+    setState(() {
+      isLoading = true;
+    });
+
+    final controller = Get.find<HomeController>();
+    await controller.loadProgressFromAPI();
+
+    final currentTopic = controller.currentTopic.value;
+    final currentNode = controller.currentNode.value;
+    final topicList = topics.reversed.toList(); // Đảo ngược lại để khớp với logic
+
+    int currentTopicIndex = topicList.indexOf(currentTopic);
+
+    setState(() {
+      if (currentTopicIndex == -1) {
+        // Nếu currentTopic không hợp lệ, mặc định tất cả node đều bị khóa
+        nodeStatus = List.generate(40, (_) => 0);
+      } else {
         nodeStatus = List.generate(40, (index) {
-          if (index == 0) return 1; // Topic 1, Node 1: đang làm
-          return 0; // Các node khác: chưa làm
+          int topicIndex = index ~/ 5;
+          int nodeInTopic = index % 5 + 1;
+
+          if (topicIndex < currentTopicIndex) {
+            return 2; // Đã học toàn bộ topic
+          } else if (topicIndex == currentTopicIndex) {
+            if (nodeInTopic < currentNode) return 2;
+            if (nodeInTopic == currentNode) return 1;
+            return 0;
+          } else {
+            return 0; // Chưa học
+          }
         });
-      });
-      await _saveNodeStatus();
-    }
+      }
+      isLoading = false;
+    });
   }
 
   // Lưu trạng thái vào SharedPreferences
@@ -113,14 +137,14 @@ class _HomePageViewState extends State<_HomePageView>
     );
   }
 
-  // Hàm để cuộn xuống dưới cùng, thử lại nếu ScrollController chưa sẵn sàng
-  void _scrollToBottom() {
+  // Hàm để cuộn lên trên cùng, thử lại nếu ScrollController chưa sẵn sàng
+  void _scrollToTop() {
     Future.delayed(Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        _scrollController.jumpTo(_scrollController.position.minScrollExtent);
       } else {
         // Thử lại sau 100ms nếu ScrollController chưa sẵn sàng
-        _scrollToBottom();
+        _scrollToTop();
       }
     });
   }
@@ -151,10 +175,8 @@ class _HomePageViewState extends State<_HomePageView>
   // Hàm để cập nhật trạng thái khi hoàn thành node
   void completeNode(int nodeIndex) {
     setState(() {
-      nodeStatus[nodeIndex] =
-          2; // Đánh dấu node hiện tại là đã hoàn thành (màu xanh)
+      nodeStatus[nodeIndex] = 2; // Đánh dấu node là đã hoàn thành
     });
-    // Lưu trạng thái sau khi cập nhật
     _saveNodeStatus();
   }
 
@@ -185,7 +207,6 @@ class _HomePageViewState extends State<_HomePageView>
               child: Obx(
                 () => Row(
                   children: [
-                    // Avatar
                     Container(
                       width: 60,
                       height: 60,
@@ -225,7 +246,6 @@ class _HomePageViewState extends State<_HomePageView>
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // Tên và Điểm
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -343,12 +363,7 @@ class _HomePageViewState extends State<_HomePageView>
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color.fromARGB(
-                        255,
-                        255,
-                        255,
-                        255,
-                      ).withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.2),
                       blurRadius: 6,
                       offset: const Offset(2, 2),
                     ),
@@ -358,7 +373,6 @@ class _HomePageViewState extends State<_HomePageView>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Nút 1: Setting
                     GestureDetector(
                       onTapDown: (_) {
                         setState(() {
@@ -391,7 +405,6 @@ class _HomePageViewState extends State<_HomePageView>
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Nút 2: Daily Check
                     GestureDetector(
                       onTapDown: (_) {
                         setState(() {
@@ -417,7 +430,6 @@ class _HomePageViewState extends State<_HomePageView>
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Nút 3: Leaderboard
                     GestureDetector(
                       onTapDown: (_) {
                         setState(() {
@@ -451,239 +463,129 @@ class _HomePageViewState extends State<_HomePageView>
                 ),
               ),
             ),
-            // Phần Roadmap cuộn được
+            // Phần Roadmap cuộn được với ListView.builder
             Positioned(
-              top: MediaQuery.of(context).padding.top, // Cách đỉnh để không che avatar/nút
-              left: 45,
+              top: MediaQuery.of(context).padding.top + 80,
+              left: 0,
               right: 0,
-              bottom: 0, // Cách đáy để không che bottom navbar
+              bottom: 0,
               child: ClipRect(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  reverse: false,
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 8,
-                    child: Stack(
-                      children: [
-                        // Tạo 8 topic, mỗi topic 5 node
-                        ...List.generate(8, (topicIndex) {
-                          int displayIndex = topicIndex;
-                          double topicOffset =
-                              displayIndex * MediaQuery.of(context).size.height;
+                child: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        reverse: true, // Đảo ngược hướng cuộn để bắt đầu từ dưới lên
+                        itemCount: topics.length,
+                        itemBuilder: (context, topicIndex) {
                           String currentTopic = topics[topicIndex];
-                          int baseNodeIndex =
-                              topicIndex * 5; // Mỗi topic có 5 node
+                          int baseNodeIndex = topicIndex * 5;
 
-                          return [
-                            // Node 1
-                            Positioned(
-                              bottom:
-                                  MediaQuery.of(context).size.height * 0.15 +
-                                  topicOffset,
-                              left: MediaQuery.of(context).size.width * 0.1,
-                              child: GestureDetector(
-                                onTapDown: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex] = 0.9;
-                                  });
-                                },
-                                onTapUp: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex] = 1.0;
-                                  });
-                                  SoundManager.playButtonSound();
-                                  Get.toNamed(
-                                    Routes.exercise1,
-                                    arguments: {
-                                      'topic': currentTopic,
-                                      'node': 1,
-                                    },
-                                  )?.then((result) {
-                                    logger.i(
-                                      'Result from exercise1 (Node ${baseNodeIndex}, Topic $currentTopic): $result',
-                                    ); // Debug log
-                                    if (result == true) {
-                                      completeNode(baseNodeIndex);
-                                    }
-                                  });
-                                },
-                                child: AnimatedScale(
-                                  scale: nodeScales[baseNodeIndex],
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Image.asset(
-                                    getNodeIcon(nodeStatus[baseNodeIndex]),
-                                    width: 60,
-                                    height: 60,
+                          return Column(
+                            children: [
+                              // Hiển thị tên topic
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                child: Text(
+                                  currentTopic,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
-                            ),
-                            // Node 2
-                            Positioned(
-                              bottom:
-                                  MediaQuery.of(context).size.height * 0.35 +
-                                  topicOffset,
-                              left: MediaQuery.of(context).size.width * 0.30,
-                              child: GestureDetector(
-                                onTapDown: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 1] = 0.9;
-                                  });
-                                },
-                                onTapUp: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 1] = 1.0;
-                                  });
-                                  SoundManager.playButtonSound();
-                                  Get.toNamed(
-                                    Routes.exercise1,
-                                    arguments: {
-                                      'topic': currentTopic,
-                                      'node': 2,
-                                    },
-                                  )?.then((result) {
-                                    logger.i(
-                                      'Result from exercise1 (Node ${baseNodeIndex + 1}, Topic $currentTopic): $result',
-                                    ); // Debug log
-                                    if (result == true) {
-                                      completeNode(baseNodeIndex + 1);
-                                    }
-                                  });
-                                },
-                                child: AnimatedScale(
-                                  scale: nodeScales[baseNodeIndex + 1],
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Image.asset(
-                                    getNodeIcon(nodeStatus[baseNodeIndex + 1]),
-                                    width: 60,
-                                    height: 60,
-                                  ),
-                                ),
+                              // Hiển thị các node trong topic theo kiểu zigzag dọc
+                              Column(
+                                children: List.generate(5, (nodeInTopic) {
+                                  int nodeIndex = baseNodeIndex + nodeInTopic;
+                                  bool isLocked = nodeStatus[nodeIndex] == 0;
+                                  bool isEven = nodeInTopic % 2 == 0;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    child: Align(
+                                      alignment: isEven
+                                          ? Alignment.centerLeft
+                                          : Alignment.centerRight,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                          left: isEven ? 50 : 0,
+                                          right: isEven ? 0 : 50,
+                                        ),
+                                        child: nodeInTopic == 4
+                                            ? GestureDetector(
+                                                onTap: null, // Tạm vô hiệu hóa
+                                                child: Image.asset(
+                                                  'assets/icons/chest.png',
+                                                  width: 80,
+                                                  height: 80,
+                                                ),
+                                              )
+                                            : Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTapDown: isLocked
+                                                        ? null
+                                                        : (_) {
+                                                            setState(() {
+                                                              nodeScales[nodeIndex] = 0.9;
+                                                            });
+                                                          },
+                                                    onTapUp: isLocked
+                                                        ? null
+                                                        : (_) {
+                                                            setState(() {
+                                                              nodeScales[nodeIndex] = 1.0;
+                                                            });
+                                                            SoundManager.playButtonSound();
+                                                            Get.toNamed(
+                                                              Routes.exercise1,
+                                                              arguments: {
+                                                                'topic': currentTopic,
+                                                                'node': nodeInTopic + 1,
+                                                              },
+                                                            )?.then((result) {
+                                                              logger.i(
+                                                                'Result from exercise1 (Node $nodeIndex, Topic $currentTopic): $result',
+                                                              );
+                                                              if (result == true) {
+                                                                completeNode(nodeIndex);
+                                                              }
+                                                            });
+                                                          },
+                                                    child: AnimatedScale(
+                                                      scale: nodeScales[nodeIndex],
+                                                      duration: const Duration(milliseconds: 200),
+                                                      child: Image.asset(
+                                                        getNodeIcon(nodeStatus[nodeIndex]),
+                                                        width: 60,
+                                                        height: 60,
+                                                        color: isLocked ? Colors.grey.withOpacity(0.5) : null,
+                                                        colorBlendMode: isLocked ? BlendMode.modulate : null,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (isLocked)
+                                                    Icon(
+                                                      Icons.lock,
+                                                      size: 30,
+                                                      color: Colors.black.withOpacity(0.7),
+                                                    ),
+                                                ],
+                                              ),
+                                      ),
+                                    ),
+                                  );
+                                }),
                               ),
-                            ),
-                            // Node 3
-                            Positioned(
-                              bottom:
-                                  MediaQuery.of(context).size.height * 0.45 +
-                                  topicOffset,
-                              right: MediaQuery.of(context).size.width * 0.15,
-                              child: GestureDetector(
-                                onTapDown: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 2] = 0.9;
-                                  });
-                                },
-                                onTapUp: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 2] = 1.0;
-                                  });
-                                  SoundManager.playButtonSound();
-                                  Get.toNamed(
-                                    Routes.exercise1,
-                                    arguments: {
-                                      'topic': currentTopic,
-                                      'node': 3,
-                                    },
-                                  )?.then((result) {
-                                    logger.i(
-                                      'Result from exercise1 (Node ${baseNodeIndex + 2}, Topic $currentTopic): $result',
-                                    ); // Debug log
-                                    if (result == true) {
-                                      completeNode(baseNodeIndex + 2);
-                                    }
-                                  });
-                                },
-                                child: AnimatedScale(
-                                  scale: nodeScales[baseNodeIndex + 2],
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Image.asset(
-                                    getNodeIcon(nodeStatus[baseNodeIndex + 2]),
-                                    width: 60,
-                                    height: 60,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Node 4
-                            Positioned(
-                              top:
-                                  MediaQuery.of(context).size.height * 0.25 +
-                                  topicOffset,
-                              left: MediaQuery.of(context).size.width * 0.2,
-                              child: GestureDetector(
-                                onTapDown: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 3] = 0.9;
-                                  });
-                                },
-                                onTapUp: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 3] = 1.0;
-                                  });
-                                  SoundManager.playButtonSound();
-                                  Get.toNamed(
-                                    Routes.exercise1,
-                                    arguments: {
-                                      'topic': currentTopic,
-                                      'node': 4,
-                                    },
-                                  )?.then((result) {
-                                    logger.i(
-                                      'Result from exercise1 (Node ${baseNodeIndex + 3}, Topic $currentTopic): $result',
-                                    ); // Debug log
-                                    if (result == true) {
-                                      completeNode(baseNodeIndex + 3);
-                                    }
-                                  });
-                                },
-                                child: AnimatedScale(
-                                  scale: nodeScales[baseNodeIndex + 3],
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Image.asset(
-                                    getNodeIcon(nodeStatus[baseNodeIndex + 3]),
-                                    width: 60,
-                                    height: 60,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Node 5 (Chest)
-                            Positioned(
-                              top:
-                                  MediaQuery.of(context).size.height * 0.12 +
-                                  topicOffset,
-                              right: MediaQuery.of(context).size.width * 0.1,
-                              child: GestureDetector(
-                                onTapDown: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 4] = 0.9;
-                                  });
-                                },
-                                onTapUp: (_) {
-                                  setState(() {
-                                    nodeScales[baseNodeIndex + 4] = 1.0;
-                                  });
-                                  SoundManager.playButtonSound();
-                                  // Không điều hướng cho chest, nhưng vẫn cập nhật trạng thái
-                                  completeNode(baseNodeIndex + 4);
-                                },
-                                child: AnimatedScale(
-                                  scale: nodeScales[baseNodeIndex + 4],
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Image.asset(
-                                    'assets/icons/chest.png',
-                                    width: 100,
-                                    height: 100,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ];
-                        }).expand((element) => element).toList(),
-                      ],
-                    ),
-                  ),
-                ),
+                              const SizedBox(height: 20), // Khoảng cách giữa các topic
+                            ],
+                          );
+                        },
+                      ),
               ),
             ),
           ],

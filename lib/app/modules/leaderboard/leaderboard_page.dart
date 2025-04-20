@@ -70,7 +70,9 @@ class LeaderboardPage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF2277B4), // Updated AppBar color #2277B4
+        backgroundColor: const Color(
+          0xFF2277B4,
+        ), // Updated AppBar color #2277B4
         elevation: 0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
@@ -86,7 +88,8 @@ class LeaderboardPage extends StatelessWidget {
           children: [
             // Top 3 podium - Reduced height further
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.25, // Reduced height
+              height:
+                  MediaQuery.of(context).size.height * 0.25, // Reduced height
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -350,15 +353,23 @@ class LeaderboardPage extends StatelessWidget {
                         opacity: 1.0,
                         duration: const Duration(milliseconds: 500),
                         child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8), // Reduced margin
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 8,
+                          ), // Reduced margin
                           decoration: BoxDecoration(
                             color: const Color(0xFF8FEFFF).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), // Reduced padding
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ), // Reduced padding
                             leading: CircleAvatar(
-                              backgroundColor: const Color(0xFF8FEFFF).withOpacity(0.3),
+                              backgroundColor: const Color(
+                                0xFF8FEFFF,
+                              ).withOpacity(0.3),
                               radius: 22,
                               child: Text(
                                 player['avatar'],
@@ -418,7 +429,9 @@ class LeaderboardPage extends StatelessWidget {
             const SizedBox(height: 12), // Reduced spacing
             // Your position
             Container(
-              margin: const EdgeInsets.only(bottom: 12), // Reduced bottom margin
+              margin: const EdgeInsets.only(
+                bottom: 12,
+              ), // Reduced bottom margin
               padding: const EdgeInsets.all(12), // Reduced padding
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -437,10 +450,7 @@ class LeaderboardPage extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: const Color(0xFF8FEFFF).withOpacity(0.3),
                     radius: 22,
-                    child: const Text(
-                      '👧',
-                      style: TextStyle(fontSize: 20),
-                    ),
+                    child: const Text('👧', style: TextStyle(fontSize: 20)),
                   ),
                   const SizedBox(width: 10),
                   const Expanded(
@@ -457,16 +467,16 @@ class LeaderboardPage extends StatelessWidget {
                         ),
                         Text(
                           'Tiếp tục cố gắng nhé!',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 11,
-                          ),
+                          style: TextStyle(color: Colors.black54, fontSize: 11),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF8FEFFF),
                       borderRadius: BorderRadius.circular(16),

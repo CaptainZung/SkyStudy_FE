@@ -1,5 +1,5 @@
 class ApiConfig {
-  static const String url = '968a-118-69-62-145.ngrok-free.app';
+  static const String url = '88e2-2402-9d80-417-30c1-dc7-83e6-4434-da82.ngrok-free.app';
   static const String baseHttpUrl = 'https://$url';
   static const String baseWsUrl = 'wss://$url';
   

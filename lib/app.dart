@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:skystudy/app/controllers/lottie_controller.dart';
+import 'package:skystudy/app/modules/home/home_controller.dart';
 import 'config/theme.dart';
 import 'app/routes/app_pages.dart';
 import 'app/modules/auth/login_service.dart';
@@ -9,6 +11,8 @@ import 'app/utils/sound_manager.dart'; // Thêm import cho SoundManager
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SoundManager.init(); // Khởi tạo SoundManager để preload và phát nhạc nền
+  Get.put(HomeController());
+  Get.put(() => LottieController());
   runApp(const SkyStudyApp());
 }
 

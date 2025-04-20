@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:skystudy/app/modules/dictionary/dictionary_Service.dart';
+import 'package:skystudy/app/modules/dictionary/dictionary_service.dart';
 import 'package:skystudy/app/modules/dictionary/dictionary_model.dart';
 import 'package:logger/logger.dart';
 
@@ -11,6 +11,7 @@ class DictionaryController extends GetxController {
       Rx<Map<String, List<Dictionary>>?>(null);
   final RxString _errorMessage = ''.obs;
   final RxBool _isLoading = true.obs;
+
 
   final Logger _logger = Logger();
   bool _isMounted = true; // Thêm kiểm tra mounted
@@ -33,17 +34,12 @@ class DictionaryController extends GetxController {
   }
 
   Future<void> fetchData() async {
-    _logger.i('fetchData called');
     _isLoading.value = true;
-    _logger.i('Start fetching top words by topic');
-
     try {
-      _logger.i('Before API call');
       final startTime = DateTime.now();
       _allWords.value = await _dictionaryApi.getTopWordsByTopic().timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          _logger.e('API call timed out after 10 seconds');
           throw Exception('Request timed out after 10 seconds');
         },
       );
@@ -52,8 +48,6 @@ class DictionaryController extends GetxController {
       );
       _filteredWords.value = _allWords.value;
       _errorMessage.value = '';
-      _logger.i('Data loaded: ${_allWords.value?.keys.toList() ?? 'null'}');
-      _logger.i('Fetched ${_allWords.value?.length ?? 0} topics successfully');
     } catch (e, stackTrace) {
       _errorMessage.value = e.toString();
       _logger.e(
@@ -63,12 +57,10 @@ class DictionaryController extends GetxController {
       );
     } finally {
       _isLoading.value = false;
-      _logger.i('Fetch operation completed, isLoading set to false');
     }
   }
 
   Future<void> refreshData() async {
-    _logger.i('Refreshing dictionary data');
     await fetchData(); // Tái sử dụng fetchData để làm mới
   }
 
@@ -131,4 +123,5 @@ class DictionaryController extends GetxController {
       throw Exception('Error fetching words for topic "$topic": $e');
     }
   }
+
 }

@@ -51,12 +51,16 @@ class PronunciationCheckPage extends StatelessWidget {
                     Obx(() {
                       if (controller.recognizedText.value.isNotEmpty) {
                         return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              controller.accuracy.value >= 0.8 ? 'Phát Âm Đúng' : 'Sai Mất Rồi',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: controller.accuracy.value >= 0.8 ? Colors.green : Colors.red,
+                            Center(
+                              child: Text(
+                                controller.accuracy.value >= 0.8 ? 'Phát Âm Đúng' : 'Sai Mất Rồi',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: controller.accuracy.value >= 0.8 ? Colors.green : Colors.red,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -80,27 +84,65 @@ class PronunciationCheckPage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              'Độ chính xác: ${(controller.accuracy.value * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 16, color: Colors.black54),
+                            Center(
+                              child: Text(
+                                'Độ chính xác: ${(controller.accuracy.value * 100).toStringAsFixed(1)}%',
+                                style: const TextStyle(fontSize: 16, color: Colors.black54),
+                              ),
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              controller.pronunciationFeedback.value,
-                              style: const TextStyle(fontSize: 16, color: Colors.black54),
-                              textAlign: TextAlign.center,
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 300),
+                                child: Text(
+                                  controller.pronunciationFeedback.value,
+                                  style: const TextStyle(fontSize: 16, color: Colors.black54),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
+                            const SizedBox(height: 16),
+                            // Display Lottie animation and feedback message
+                            Obx(() {
+                              if (controller.lottieAnimationPath.value.isNotEmpty) {
+                                return Column(
+                                  children: [
+                                    LottieAnimationWidget(
+                                      animationPath: controller.lottieAnimationPath.value,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Center(
+                                      child: Text(
+                                        controller.feedbackMessage.value,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }),
                           ],
                         );
                       } else if (controller.isProcessing.value) {
-                        return const Text(
-                          'Đang xử lý...',
-                          style: TextStyle(fontSize: 20, color: Colors.black54),
+                        return const Center(
+                          child: Text(
+                            'Đang xử lý...',
+                            style: TextStyle(fontSize: 20, color: Colors.black54),
+                          ),
                         );
                       }
-                      return const Text(
-                        'Hãy nói rõ ràng để kiểm tra phát âm nhé!',
-                        style: TextStyle(fontSize: 20, color: Colors.black54),
+                      return const Center(
+                        child: Text(
+                          'Hãy nói rõ ràng để kiểm tra phát âm nhé!',
+                          style: TextStyle(fontSize: 20, color: Colors.black54),
+                          textAlign: TextAlign.center,
+                        ),
                       );
                     }),
                     const SizedBox(height: 32),
@@ -112,7 +154,6 @@ class PronunciationCheckPage extends StatelessWidget {
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                // Logic lưu (có thể thêm sau)
                                 Get.snackbar('Thông báo', 'Đã lưu kết quả.');
                               },
                               style: ElevatedButton.styleFrom(
@@ -132,6 +173,8 @@ class PronunciationCheckPage extends StatelessWidget {
                                 controller.pronunciationFeedback.value = '';
                                 controller.ttsAudioBase64.value = '';
                                 controller.isPlayingTts.value = false;
+                                controller.lottieAnimationPath.value = '';
+                                controller.feedbackMessage.value = '';
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
@@ -206,6 +249,57 @@ class PronunciationCheckPage extends StatelessWidget {
             ],
           ),
         );
+      },
+    );
+  }
+}
+
+// Separate widget to manage Lottie animation with a controller
+class LottieAnimationWidget extends StatefulWidget {
+  final String animationPath;
+
+  const LottieAnimationWidget({super.key, required this.animationPath});
+
+  @override
+  LottieAnimationWidgetState createState() => LottieAnimationWidgetState();
+}
+
+class LottieAnimationWidgetState extends State<LottieAnimationWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void didUpdateWidget(LottieAnimationWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animationPath != widget.animationPath) {
+      // When the animation path changes, reset and play the new animation in a loop
+      _controller.reset();
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Lottie.asset(
+      widget.animationPath,
+      controller: _controller,
+      width: 120,
+      height: 120,
+      fit: BoxFit.cover,
+      onLoaded: (composition) {
+        _controller.duration = composition.duration;
+        _controller.repeat(); // Start looping the animation
       },
     );
   }

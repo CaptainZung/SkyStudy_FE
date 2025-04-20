@@ -14,6 +14,7 @@ import '../modules/dictionary/dictionary_page.dart';
 import '../modules/dictionary/dictionary_binding.dart';
 import '../modules/detection/detection_page.dart';
 import '../modules/achievements/achievements_page.dart';
+import '../modules/achievements/achievements_binding.dart';
 import '../modules/topic/topic_page.dart';
 import '../modules/topic/topic_binding.dart';
 import '../modules/onboarding/onboarding_page.dart';
@@ -41,7 +42,7 @@ class AppPages {
     GetPage(name: Routes.dictionary, page: () => const DictionaryPage(), binding: DictionaryBinding()),
     GetPage(name: Routes.detection, page: () => const DetectionPage()),
     GetPage(name: Routes.detectionresult, page: () => const DetectionResultPage(), binding: DetectionResultBinding()),
-    GetPage(name: Routes.achievements, page: () => const AchievementsPage()),
+    GetPage(name: Routes.achievements, page: () => const AchievementsPage(), binding: AchievementsBinding()),
     GetPage(name: Routes.topic, page: () => const TopicPage(), binding: TopicBinding()),
     GetPage(name: Routes.onboard, page: () => const OnboardingPage()),
     GetPage(name: Routes.realtime, page: () => const RealtimePage()),

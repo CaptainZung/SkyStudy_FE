@@ -77,9 +77,6 @@ class Exercise2Controller extends GetxController {
           arguments: {'topic': topic, 'node': node, 'exercise': nextExercise}, // Truyền topic, node, exercise vào page mới
         );
       }
-    } else {
-      // Nếu là bài tập cuối (exercise == 4), thông báo hoàn tất bài học
-      Get.snackbar('Hoàn thành', 'Bạn đã hoàn tất bài học này 🎉');
     }
   }
 }
