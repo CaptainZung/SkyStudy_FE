@@ -192,7 +192,7 @@ class _HomePageViewState extends State<_HomePageView>
             Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/home.png'),
+                  image: AssetImage('assets/images/home1.png'),
                   fit: BoxFit.cover,
                   repeat: ImageRepeat.repeatY, // Lặp lại hình nền khi cuộn
                 ),
