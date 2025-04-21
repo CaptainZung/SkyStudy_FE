@@ -159,12 +159,17 @@ class Exercise3Controller extends GetxController {
         lottieAnimationPath.value = accuracy.value >= 0.8 ? 'assets/lottie/dung.json' : 'assets/lottie/sai.json';
         feedbackMessage.value = accuracy.value >= 0.8 ? 'Phát âm rất tốt!' : 'Hãy thử lại nhé!';
 
+        // Update UI state before playing sound
+        enableContinueButton.value = accuracy.value >= 0.8;
+
+        // Hide loading animation immediately after processing
+        isProcessing.value = false;
+
+        // Play sound after UI is updated
         if (accuracy.value >= 0.8) {
           await SoundManager.playCorrectSound();
-          enableContinueButton.value = true;
         } else {
           await SoundManager.playWrongSound();
-          enableContinueButton.value = false;
         }
 
         logger.i('✅ Kết quả từ server:');
@@ -179,7 +184,10 @@ class Exercise3Controller extends GetxController {
       logger.e('💥 Lỗi khi kiểm tra phát âm: $e');
       Get.snackbar('Lỗi', 'Lỗi khi kiểm tra phát âm: $e');
     } finally {
-      isProcessing.value = false;
+      // Ensure isProcessing is false, though this should already be handled above
+      if (isProcessing.value) {
+        isProcessing.value = false;
+      }
     }
   }
 

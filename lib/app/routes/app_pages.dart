@@ -20,7 +20,6 @@ import '../modules/topic/topic_binding.dart';
 import '../modules/onboarding/onboarding_page.dart';
 import '../modules/realtime/realtime_page.dart';
 import '../modules/aispeech/ai_speech_page.dart';
-
 import '../modules/exercises/exercise_1/exercise_1_page.dart';
 import '../modules/exercises/exercise_1/exercise_1_binding.dart';
 import '../modules/exercises/exercise_2/exercise_2_page.dart';
@@ -29,6 +28,8 @@ import '../modules/exercises/exercise_3/exercise_3_page.dart';
 import '../modules/exercises/exercise_3/exercise_3_binding.dart';
 import '../modules/exercises/exercise_4/exercise_4_page.dart';
 import '../modules/exercises/exercise_4/exercise_4_binding.dart';
+import '../modules/leaderboard/leaderboard_page.dart';
+import '../modules/leaderboard/leaderboard_binding.dart';
 
 part 'app_routes.dart';
 
@@ -52,5 +53,6 @@ class AppPages {
     GetPage(name: Routes.exercise2, page: () => const Exercise2Page(), binding: Exercise2Binding()),
     GetPage(name: Routes.exercise3, page: () => const Exercise3Page(), binding: Exercise3Binding()),
     GetPage(name: Routes.exercise4, page: () => const Exercise4Page(), binding: Exercise4Binding()),
+    GetPage(name: Routes.leaderboard, page: () => const LeaderboardPage(), binding: LeaderboardBinding()),
   ];
 }

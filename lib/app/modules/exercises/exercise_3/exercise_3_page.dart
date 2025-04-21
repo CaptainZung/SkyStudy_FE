@@ -190,96 +190,96 @@ class Exercise3Page extends StatelessWidget {
                       const SizedBox(height: 32),
 
                       // Nút Tiếp tục và Thử lại
-                      // Obx(() {
-                      //   if (controller.recognizedText.value.isNotEmpty) {
-                      //     return Row(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       children: [
-                      //         ElevatedButton(
-                      //           onPressed: controller.enableContinueButton.value
-                      //               ? () {
-                      //                   controller.goToNextExercise();
-                      //                 }
-                      //               : null,
-                      //           style: ElevatedButton.styleFrom(
-                      //             backgroundColor: Colors.green,
-                      //             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      //           ),
-                      //           child: const Text(
-                      //             'Tiếp tục',
-                      //             style: TextStyle(color: Colors.white, fontSize: 16),
-                      //           ),
-                      //         ),
-                      //         const SizedBox(width: 16),
-                      //         ElevatedButton(
-                      //           onPressed: () {
-                      //             controller.resetState();
-                      //           },
-                      //           style: ElevatedButton.styleFrom(
-                      //             backgroundColor: Colors.blue,
-                      //             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      //           ),
-                      //           child: const Text(
-                      //             'Thử lại',
-                      //             style: TextStyle(color: Colors.white, fontSize: 16),
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     );
-                      //   }
-                      //   return const SizedBox.shrink();
-                      // }),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.toNamed(
-                                Routes.exercise4,
-                                arguments: {
-                                  'topic': controller.topic,
-                                  'node': controller.node,
-                                  'exercise': 4,
+                      Obx(() {
+                        if (controller.recognizedText.value.isNotEmpty) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: controller.enableContinueButton.value
+                                    ? () {
+                                        controller.goToNextExercise();
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                ),
+                                child: const Text(
+                                  'Tiếp tục',
+                                  style: TextStyle(color: Colors.white, fontSize: 16),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  controller.resetState();
                                 },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 12,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                ),
+                                child: const Text(
+                                  'Thử lại',
+                                  style: TextStyle(color: Colors.white, fontSize: 16),
+                                ),
                               ),
-                            ),
-                            child: const Text(
-                              'Tiếp tục',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              controller.resetState();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 12,
-                              ),
-                            ),
-                            child: const Text(
-                              'Thử lại',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     ElevatedButton(
+                      //       onPressed: () {
+                      //         Get.toNamed(
+                      //           Routes.exercise4,
+                      //           arguments: {
+                      //             'topic': controller.topic,
+                      //             'node': controller.node,
+                      //             'exercise': 4,
+                      //           },
+                      //         );
+                      //       },
+                      //       style: ElevatedButton.styleFrom(
+                      //         backgroundColor: Colors.green,
+                      //         padding: const EdgeInsets.symmetric(
+                      //           horizontal: 32,
+                      //           vertical: 12,
+                      //         ),
+                      //       ),
+                      //       child: const Text(
+                      //         'Tiếp tục',
+                      //         style: TextStyle(
+                      //           color: Colors.white,
+                      //           fontSize: 16,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     const SizedBox(width: 16),
+                      //     ElevatedButton(
+                      //       onPressed: () {
+                      //         controller.resetState();
+                      //       },
+                      //       style: ElevatedButton.styleFrom(
+                      //         backgroundColor: Colors.blue,
+                      //         padding: const EdgeInsets.symmetric(
+                      //           horizontal: 32,
+                      //           vertical: 12,
+                      //         ),
+                      //       ),
+                      //       child: const Text(
+                      //         'Thử lại',
+                      //         style: TextStyle(
+                      //           color: Colors.white,
+                      //           fontSize: 16,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
 
                       const Spacer(),
                       // Nút ghi âm

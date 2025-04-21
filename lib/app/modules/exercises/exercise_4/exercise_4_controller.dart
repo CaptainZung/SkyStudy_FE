@@ -8,7 +8,7 @@ import 'package:logger/logger.dart';
 
 class Exercise4Controller extends GetxController {
   Rxn<Exercise4Model> lesson = Rxn<Exercise4Model>();
-  var enableContinueButton = true.obs;
+  var enableContinueButton = false.obs;
   final Logger logger = Logger();
 
   late String topic;
