@@ -1,8 +1,11 @@
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import './singleword_page.dart';
+import 'topic_service.dart';
 
 class TopicController extends GetxController {
   final Logger logger = Logger();
+  final TopicApi topicApi = TopicApi();
 
   // Danh sách các chủ đề với tên và đường dẫn icon
   final List<Map<String, String>> topics = [
@@ -16,8 +19,15 @@ class TopicController extends GetxController {
     {'name': 'Clothes', 'icon': 'assets/images/clothes.png'},
   ];
 
-  void onTopicTap(Map<String, String> topic) {
+  Future<void> onTopicTap(Map<String, String> topic) async {
     logger.i('Topic tapped: ${topic['name']}');
-    // Thêm logic điều hướng nếu cần, ví dụ: Get.toNamed(Routes.someRoute, arguments: topic);
+    try {
+      final word = await topicApi.getword(topic['name']!);
+      // Điều hướng đến SingleWordPage, truyền dữ liệu từ vựng
+      Get.to(() => const SingleWordPage(), arguments: word);
+    } catch (e) {
+      logger.e('Error: $e');
+      Get.snackbar('Lỗi', 'Không thể tải từ vựng cho chủ đề ${topic['name']}');
+    }
   }
 }
