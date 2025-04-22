@@ -34,7 +34,7 @@ class DetectionController extends GetxController {
     var status = await Permission.camera.request();
     if (status.isDenied) {
       errorMessage.value = 'Quyền truy cập camera bị từ chối. Vui lòng cấp quyền để sử dụng camera.';
-      print('Camera permission denied');
+      logger.w('Camera permission denied');
       return;
     }
 

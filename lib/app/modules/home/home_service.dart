@@ -13,7 +13,7 @@ class ProgressService {
     if (token == null) throw Exception('No token found');
 
     final response = await http.post(
-      Uri.parse('$baseUrl/getUserHighestLevel'),
+      Uri.parse('$baseUrl/GetUserHighestLevel'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',

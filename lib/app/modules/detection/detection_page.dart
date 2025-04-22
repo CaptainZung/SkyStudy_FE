@@ -6,6 +6,7 @@ import 'detection_controller.dart';
 import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lottie/lottie.dart';
+import 'package:logger/logger.dart';
 
 class DetectionPage extends StatelessWidget {
   const DetectionPage({super.key});
@@ -17,7 +18,7 @@ class DetectionPage extends StatelessWidget {
       builder: (controller) {
         return Scaffold(
           appBar: CustomAppBar(
-            title: 'Detection',
+            title: 'Nhận diện đối tượng',
             backgroundColor: Colors.blue,
             showBackButton: false,
             titleStyle: const TextStyle(
@@ -49,11 +50,10 @@ class DetectionPage extends StatelessWidget {
             children: [
               // Camera preview kéo dài toàn màn hình
               Obx(() {
-                print('Rendering DetectionPage UI. isCameraInitialized: ${controller.isCameraInitialized.value}');
-                print('Error message: ${controller.errorMessage.value}');
 
-                if (controller.errorMessage.value.isNotEmpty) {
-                  print('Hiển thị thông báo lỗi: ${controller.errorMessage.value}');
+
+             if (controller.errorMessage.value.isNotEmpty) {
+                 
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

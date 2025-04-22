@@ -31,6 +31,7 @@ import '../modules/exercises/exercise_4/exercise_4_binding.dart';
 import '../modules/leaderboard/leaderboard_page.dart';
 import '../modules/leaderboard/leaderboard_binding.dart';
 
+
 part 'app_routes.dart';
 
 class AppPages {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../global_widgets/appbar.dart'; // Import CustomAppBar
 import 'leaderboard_controller.dart';
 
 class LeaderboardPage extends StatelessWidget {
@@ -14,29 +15,19 @@ class LeaderboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<LeaderboardController>(
-      init: LeaderboardController(), // Initialize controller here
+      init: LeaderboardController(),
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFFC8E5EB),
-          appBar: AppBar(
-            title: const Text(
-              'Bảng Xếp Hạng',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            centerTitle: true,
+          backgroundColor: const Color(0xFFF5F9FC), // Màu nền sáng hơn
+          appBar: CustomAppBar(
+            title: 'Bảng Xếp Hạng',
             backgroundColor: const Color(0xFF2277B4),
-            elevation: 0,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+            titleStyle: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
+            showBackButton: true,
           ),
           body: Obx(() {
             if (controller.isLoading.value) {
@@ -44,7 +35,15 @@ class LeaderboardPage extends StatelessWidget {
             }
 
             if (controller.leaderboardData.isEmpty) {
-              return const Center(child: Text('Không có dữ liệu bảng xếp hạng'));
+              return const Center(
+                child: Text(
+                  'Không có dữ liệu bảng xếp hạng',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                  ),
+                ),
+              );
             }
 
             return FutureBuilder<String>(
@@ -60,250 +59,45 @@ class LeaderboardPage extends StatelessWidget {
                 );
 
                 return Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   child: Column(
                     children: [
-                      // Rest of your UI code (unchanged)
+                      // Top 3 Leaderboard UI
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.25,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (controller.leaderboardData.length > 1)
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[100],
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Text(
-                                        '2',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    CircleAvatar(
-                                      radius: 28,
-                                      backgroundColor: Colors.white,
-                                      child: Text(
-                                        controller.leaderboardData[1]['avatar'],
-                                        style: const TextStyle(fontSize: 26),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      controller.leaderboardData[1]['name'],
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      '${controller.leaderboardData[1]['score']} điểm',
-                                      style: const TextStyle(
-                                        color: Color(0xFF0077B6),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    AnimatedScale(
-                                      scale: 1.0,
-                                      duration: const Duration(milliseconds: 300),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          controller.leaderboardData[1]['badge'],
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              _buildTopPlayerCard(
+                                rank: 2,
+                                color: Colors.grey[100],
+                                textColor: Colors.black54,
+                                player: controller.leaderboardData[1],
+                                avatarRadius: 28,
                               ),
                             if (controller.leaderboardData.isNotEmpty)
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.amber[100],
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Text(
-                                        '1',
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.amber,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    CircleAvatar(
-                                      radius: 36,
-                                      backgroundColor: Colors.white,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Text(
-                                            controller.leaderboardData[0]['avatar'],
-                                            style: const TextStyle(fontSize: 32),
-                                          ),
-                                          const Positioned(
-                                            top: -18,
-                                            child: Text(
-                                              '👑',
-                                              style: TextStyle(fontSize: 22),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      controller.leaderboardData[0]['name'],
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16,
-                                        color: Colors.black87,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      '${controller.leaderboardData[0]['score']} điểm',
-                                      style: const TextStyle(
-                                        color: Color(0xFF0077B6),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    AnimatedScale(
-                                      scale: 1.0,
-                                      duration: const Duration(milliseconds: 300),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber[100],
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          controller.leaderboardData[0]['badge'],
-                                          style: const TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              _buildTopPlayerCard(
+                                rank: 1,
+                                color: Colors.amber[100],
+                                textColor: Colors.amber,
+                                player: controller.leaderboardData[0],
+                                avatarRadius: 36,
+                                isCrowned: true,
                               ),
                             if (controller.leaderboardData.length > 2)
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.brown[100],
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Text(
-                                        '3',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.brown[400],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    CircleAvatar(
-                                      radius: 28,
-                                      backgroundColor: Colors.white,
-                                      child: Text(
-                                        controller.leaderboardData[2]['avatar'],
-                                        style: const TextStyle(fontSize: 26),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      controller.leaderboardData[2]['name'],
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      '${controller.leaderboardData[2]['score']} điểm',
-                                      style: const TextStyle(
-                                        color: Color(0xFF0077B6),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    AnimatedScale(
-                                      scale: 1.0,
-                                      duration: const Duration(milliseconds: 300),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.brown[100],
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          controller.leaderboardData[2]['badge'],
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              _buildTopPlayerCard(
+                                rank: 3,
+                                color: Colors.brown[100],
+                                textColor: Colors.brown[400],
+                                player: controller.leaderboardData[2],
+                                avatarRadius: 28,
                               ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 12),
+                      // Leaderboard List
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
@@ -329,7 +123,7 @@ class LeaderboardPage extends StatelessWidget {
                                   duration: const Duration(milliseconds: 500),
                                   child: Container(
                                     margin: const EdgeInsets.symmetric(
-                                      vertical: 2,
+                                      vertical: 4,
                                       horizontal: 8,
                                     ),
                                     decoration: BoxDecoration(
@@ -367,7 +161,6 @@ class LeaderboardPage extends StatelessWidget {
                                             _getProgressColor(index),
                                           ),
                                           minHeight: 5,
-                                          borderRadius: BorderRadius.circular(3),
                                         ),
                                       ),
                                       trailing: Column(
@@ -401,6 +194,7 @@ class LeaderboardPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
+                      // Current User Position
                       Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
@@ -480,6 +274,101 @@ class LeaderboardPage extends StatelessWidget {
           }),
         );
       },
+    );
+  }
+
+  Widget _buildTopPlayerCard({
+    required int rank,
+    required Color? color,
+    required Color? textColor,
+    required Map<String, dynamic> player,
+    required double avatarRadius,
+    bool isCrowned = false,
+  }) {
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              '$rank',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          CircleAvatar(
+            radius: avatarRadius,
+            backgroundColor: Colors.white,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(
+                  player['avatar'],
+                  style: TextStyle(fontSize: avatarRadius - 2),
+                ),
+                if (isCrowned)
+                  const Positioned(
+                    top: -18,
+                    child: Text(
+                      '👑',
+                      style: TextStyle(fontSize: 22),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            player['name'],
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            '${player['score']} điểm',
+            style: const TextStyle(
+              color: Color(0xFF0077B6),
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 6),
+          AnimatedScale(
+            scale: 1.0,
+            duration: const Duration(milliseconds: 300),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                player['badge'],
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

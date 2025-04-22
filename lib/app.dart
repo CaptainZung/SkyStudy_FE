@@ -9,8 +9,7 @@ import 'app/modules/auth/login_service.dart';
 import 'app/utils/onboarding_manager.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SoundManager.init(); // Khởi tạo SoundManager để preload và phát nhạc nền
+  WidgetsFlutterBinding.ensureInitialized(); 
   Get.put(HomeController());
   Get.put(() => LottieController());
   runApp(const SkyStudyApp());
