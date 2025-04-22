@@ -3,6 +3,7 @@ import 'package:skystudy/app/modules/auth/login_service.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skystudy/app/modules/home/home_service.dart';
 
 class HomeController extends GetxController {
   final topics = [
@@ -20,12 +21,16 @@ class HomeController extends GetxController {
   final Logger logger = Logger();
 
   RxMap<String, int> topicProgress = <String, int>{}.obs;
+  RxString currentTopic = ''.obs;
+  RxInt currentNode = 1.obs;
 
   @override
   void onInit() {
     super.onInit();
     loadProgress();
   }
+
+  final ProgressService progressService = ProgressService();
 
   Future<void> loadProgress() async {
     final prefs = await SharedPreferences.getInstance();
@@ -67,4 +72,26 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> loadProgressFromAPI() async {
+    try {
+      final result = await progressService.fetchUserProgress();
+      currentTopic.value = result['topic'];
+      currentNode.value = result['node'];
+      logger.i('Loaded progress: topic=${result['topic']}, node=${result['node']}');
+    } catch (e) {
+      logger.e('Error loading progress from API: $e');
+      // Fallback: Tải tiến độ từ SharedPreferences nếu API thất bại
+      final prefs = await SharedPreferences.getInstance();
+      currentTopic.value = prefs.getString('last_topic') ?? topics[0]; // Mặc định là topic đầu tiên
+      currentNode.value = prefs.getInt('last_node') ?? 1; // Mặc định là node 1
+      logger.i('Loaded progress from local: topic=${currentTopic.value}, node=${currentNode.value}');
+    }
+  }
+
+  // Thêm phương thức saveProgressToLocal
+  Future<void> saveProgressToLocal(String topic, int node) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_topic', topic);
+    await prefs.setInt('last_node', node);
+  }
 }
