@@ -7,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
   final PreferredSizeWidget? bottom;
   final TextStyle? titleStyle;
+  final List<Widget>? actions; // Add actions parameter
 
   const CustomAppBar({
     super.key,
@@ -15,6 +16,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = true,
     this.bottom,
     this.titleStyle,
+    this.actions, // Make actions optional
   });
 
   @override
@@ -22,54 +24,55 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style: titleStyle ??
+        style:
+            titleStyle ??
             const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
       ),
-      backgroundColor: Colors.transparent, // Background set to transparent for gradient
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: showBackButton
-          ? IconButton(
-              icon: Image.asset(
-                'assets/icons/back.png',
-                width: 30, // Adjust icon size
-                height: 30,
-                color: Colors.white, // Icon color to white
-              ),
-              onPressed: () {
-                Get.back();
-              },
-            )
-          : null,
+      leading:
+          showBackButton
+              ? IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                ), // Biểu tượng mặc định
+                onPressed: () {
+                  Get.back();
+                },
+              )
+              : null,
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, const Color.fromARGB(255, 13, 199, 251)], // Gradient effect
+            colors: [Colors.blue, const Color.fromARGB(255, 13, 199, 251)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
+          // borderRadius: const BorderRadius.only(
+          //   bottomLeft: Radius.circular(20),
+          //   bottomRight: Radius.circular(20),
+          // ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
               spreadRadius: 0,
               blurRadius: 10,
-              offset: Offset(0, 4), // Shadow offset
+              offset: const Offset(0, 4),
             ),
           ],
         ),
       ),
       bottom: bottom,
+      actions: actions, // Pass actions to AppBar
     );
   }
 
   @override
   Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 10));
 }

@@ -13,7 +13,7 @@ import 'package:ultralytics_yolo/yolo_model.dart';
 class RealtimeController extends GetxController {
   final Logger logger = Logger();
   final cameraController = UltralyticsYoloCameraController();
-  final double confidence = 0.5;
+  final threshold = 0.5;
   final double iou = 0.5;
   final int inputSize = 640;
 

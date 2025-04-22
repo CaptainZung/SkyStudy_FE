@@ -13,9 +13,10 @@ class RealtimePage extends StatelessWidget {
     controller.init();
 
     return Scaffold(
+      extendBodyBehindAppBar: true, // Cho phép nội dung hiển thị phía sau AppBar
       appBar: CustomAppBar(
-        title: 'YOLO Real-time Detection',
-        backgroundColor: Colors.blue, // Giữ màu nền giống AppBar cũ
+        title: 'Nhận diện thời gian thực',
+        backgroundColor: Colors.transparent, // Làm AppBar trong suốt
         showBackButton: true, // Hiển thị nút back để quay lại
       ),
       body: Obx(() {
@@ -26,7 +27,7 @@ class RealtimePage extends StatelessWidget {
         return Center(
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.85,
+            height: MediaQuery.of(context).size.height,
             child: UltralyticsYoloCameraPreview(
               boundingBoxesColorList: controller.randomBoundingBoxColors,
               controller: controller.cameraController,

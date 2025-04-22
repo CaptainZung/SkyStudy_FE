@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
+import 'package:skystudy/app/modules/global_widgets/appbar.dart';
 import 'detection_controller.dart';
 import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lottie/lottie.dart';
-import 'package:skystudy/app/modules/global_widgets/appbar.dart';
-import 'package:logger/logger.dart';
+
 class DetectionPage extends StatelessWidget {
   const DetectionPage({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +16,34 @@ class DetectionPage extends StatelessWidget {
       init: DetectionController(),
       builder: (controller) {
         return Scaffold(
-          appBar: const CustomAppBar(
+          appBar: CustomAppBar(
             title: 'Detection',
             backgroundColor: Colors.blue,
             showBackButton: false,
+            titleStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.info_outline, color: Colors.white),
+                onPressed: () {
+                  Get.snackbar(
+                    'Hướng dẫn',
+                    'Nhấn nút giữa để chụp ảnh và nhận diện đối tượng!'
+                    '\nNhấn nút bên trái để chuyển đến trang nhận diện thời gian thực!'
+                    '\nNhấn nút bên phải để chuyển camera trước/sau!',
+                    duration: const Duration(seconds: 3),
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.blue,
+                    colorText: Colors.white,
+                    borderRadius: 10,
+                    margin: const EdgeInsets.all(10),
+                  );
+                },
+              ),
+            ],
           ),
           body: Stack(
             children: [
@@ -35,6 +58,12 @@ class DetectionPage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 50,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
                         Text(
                           controller.errorMessage.value,
                           style: const TextStyle(color: Colors.red, fontSize: 16),
@@ -47,7 +76,17 @@ class DetectionPage extends StatelessWidget {
                               onPressed: () async {
                                 await openAppSettings();
                               },
-                              child: const Text('Mở cài đặt để cấp quyền'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              ),
+                              child: const Text(
+                                'Mở cài đặt để cấp quyền',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
                           ),
                       ],
@@ -59,47 +98,94 @@ class DetectionPage extends StatelessWidget {
                     controller.cameraController != null &&
                     controller.cameraController!.value.isInitialized) {
                   print('Hiển thị CameraPreview');
-                  return SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: CameraPreview(controller.cameraController!),
+                  return Stack(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: CameraPreview(controller.cameraController!),
+                      ),
+                      // Thêm overlay để định khung khu vực nhận diện
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 100.0),
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 } else {
                   print('Hiển thị CircularProgressIndicator');
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  );
                 }
               }),
               // Đặt 3 nút ở dưới cùng, trên camera preview
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 80.0),
-                  child: Container(
-                    color: const Color.fromARGB(255, 14, 104, 238),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            print('Nhấn nút navigateToRealtime');
-                            controller.navigateToRealtime();
-                          },
-                          child: Image.asset(
-                            'assets/icons/upgrade.png',
-                            width: 40,
-                            height: 40,
+                  padding: const EdgeInsets.only(bottom:60.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          print('Nhấn nút navigateToRealtime');
+                          controller.navigateToRealtime();
+                        },
+                        child: AnimatedScale(
+                          scale: 1.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/icons/upgrade.png',
+                              width: 40,
+                              height: 40,
+                            ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            print('Nhấn nút captureAndPredict');
-                            controller.captureAndPredict();
-                          },
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          print('Nhấn nút captureAndPredict');
+                          controller.captureAndPredict();
+                        },
+                        child: AnimatedScale(
+                          scale: 1.0,
+                          duration: const Duration(milliseconds: 200),
                           child: Container(
-                            decoration: const BoxDecoration(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
                             child: Image.asset(
                               'assets/icons/detect.png',
@@ -108,19 +194,35 @@ class DetectionPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            print('Nhấn nút switchCamera');
-                            controller.switchCamera();
-                          },
-                          child: Image.asset(
-                            'assets/icons/reverse.png',
-                            width: 40,
-                            height: 40,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          print('Nhấn nút switchCamera');
+                          controller.switchCamera();
+                        },
+                        child: AnimatedScale(
+                          scale: 1.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/icons/reverse.png',
+                              width: 40,
+                              height: 40,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

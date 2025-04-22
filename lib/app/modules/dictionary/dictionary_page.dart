@@ -1,11 +1,11 @@
-// lib/app/modules/dictionary/dictionary_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:skystudy/app/modules/dictionary/dictionary_controller.dart';
 import 'package:skystudy/app/modules/dictionary/dictionary_model.dart';
-import '../global_widgets/bottom_navbar.dart';
+import 'package:skystudy/app/modules/global_widgets/appbar.dart';
+import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
 import 'WordDetailScreen.dart';
-import 'your_dictionary_page.dart'; // Import YourDictionaryPage
+import 'your_dictionary_page.dart';
 
 class DictionaryPage extends StatefulWidget {
   const DictionaryPage({super.key});
@@ -14,10 +14,9 @@ class DictionaryPage extends StatefulWidget {
   State<DictionaryPage> createState() => _DictionaryPageState();
 }
 
-class _DictionaryPageState extends State<DictionaryPage>
-    with SingleTickerProviderStateMixin { // Thêm mixin để dùng TabController
+class _DictionaryPageState extends State<DictionaryPage> with SingleTickerProviderStateMixin {
   bool _showSearch = false;
-  late TabController _tabController; // Khai báo TabController
+  late TabController _tabController;
 
   final topicDescriptions = {
     'Family': 'Gia đình',
@@ -33,12 +32,12 @@ class _DictionaryPageState extends State<DictionaryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this); // Khởi tạo TabController với 2 tab
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
-    _tabController.dispose(); // Hủy TabController khi widget bị hủy
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -48,18 +47,26 @@ class _DictionaryPageState extends State<DictionaryPage>
 
     return Scaffold(
       backgroundColor: const Color(0xFFC8E5EB),
-      appBar: AppBar(
-        title: const Text(
-          'TỪ ĐIỂN',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 20,
-          ),
+      appBar: CustomAppBar(
+        title: 'TỪ ĐIỂN',
+        showBackButton: false,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(fontSize: 16),
+          tabs: const [
+            Tab(text: 'TỪ ĐIỂN'),
+            Tab(text: 'TỪ ĐIỂN CỦA TÔI'),
+          ],
         ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF2277B4),
-        elevation: 5,
+        titleStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontSize: 20,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
@@ -68,20 +75,9 @@ class _DictionaryPageState extends State<DictionaryPage>
             },
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(text: 'TỪ ĐIỂN'),
-            Tab(text: 'TỪ ĐIỂN CỦA TÔI'),
-          ],
-        ),
       ),
       body: Column(
         children: [
-          // Search bar with smooth animation
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: _showSearch ? 70 : 0,
@@ -116,15 +112,12 @@ class _DictionaryPageState extends State<DictionaryPage>
                   )
                 : null,
           ),
-          // TabBarView để hiển thị nội dung của từng tab
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab 1: DictionaryPage content (giữ nguyên nội dung hiện tại)
                 _buildDictionaryContent(controller),
-                // Tab 2: YourDictionaryPage
-                YourDictionaryPage(), // Thay thế bằng YourDictionaryPage
+                YourDictionaryPage(),
               ],
             ),
           ),
@@ -134,7 +127,6 @@ class _DictionaryPageState extends State<DictionaryPage>
     );
   }
 
-  // Tách nội dung DictionaryPage thành một phương thức riêng để tái sử dụng
   Widget _buildDictionaryContent(DictionaryController controller) {
     return Obx(() {
       if (controller.isLoading) {
@@ -162,17 +154,14 @@ class _DictionaryPageState extends State<DictionaryPage>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                child: const Text('Thử lại',
-                    style: TextStyle(color: Colors.white)),
+                child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
         );
-      } else if (controller.filteredWords == null ||
-          controller.filteredWords!.isEmpty) {
+      } else if (controller.filteredWords == null || controller.filteredWords!.isEmpty) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -192,8 +181,7 @@ class _DictionaryPageState extends State<DictionaryPage>
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: const Text('Làm mới',
-                    style: TextStyle(color: Colors.white)),
+                child: const Text('Làm mới', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -234,8 +222,7 @@ class _DictionaryPageState extends State<DictionaryPage>
                       padding: const EdgeInsets.all(16),
                       decoration: const BoxDecoration(
                         color: Color(0xFF2277B4),
-                        borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(12)),
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                       ),
                       child: Text(
                         '$topic: ${topicDescriptions[topic] ?? 'Chưa có mô tả'}',
@@ -253,8 +240,7 @@ class _DictionaryPageState extends State<DictionaryPage>
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          left: 16, right: 16, bottom: 16),
+                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -262,10 +248,7 @@ class _DictionaryPageState extends State<DictionaryPage>
                             try {
                               final words = await controller.fetchWordByTopic(topic);
                               Get.to(
-                                () => WordDetailScreen(
-                                  topic: topic,
-                                  words: words,
-                                ),
+                                () => WordDetailScreen(topic: topic, words: words),
                                 transition: Transition.rightToLeft,
                               );
                             } catch (e) {
@@ -285,8 +268,7 @@ class _DictionaryPageState extends State<DictionaryPage>
                             foregroundColor: const Color(0xFF2277B4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
-                              side: const BorderSide(
-                                  color: Color(0xFF2277B4), width: 1),
+                              side: const BorderSide(color: Color(0xFF2277B4), width: 1),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -363,14 +345,15 @@ class SingleWordDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFC8E5EB),
-      appBar: AppBar(
-        title: Text(
-          word.word,
-          style: const TextStyle(color: Colors.white),
+      appBar: CustomAppBar(
+        title: word.word,
+        showBackButton: true,
+        titleStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF2277B4),
-        elevation: 0,
+        // No actions needed for this screen
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),

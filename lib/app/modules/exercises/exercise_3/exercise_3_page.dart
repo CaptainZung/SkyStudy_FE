@@ -13,10 +13,24 @@ class Exercise3Page extends StatelessWidget {
     return GetBuilder<Exercise3Controller>(
       builder: (controller) {
         return Scaffold(
-          appBar: const CustomAppBar(
+          appBar: CustomAppBar(
             title: 'Phát Âm Từ',
             backgroundColor: Colors.blue,
             showBackButton: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.info_outline, color: Colors.white),
+                onPressed: () {
+                  Get.snackbar(
+                    'Hướng dẫn',
+                    'Nhấn vào nút ghi âm để bắt đầu phát âm từ. Sau đó, hệ thống sẽ kiểm tra độ chính xác của bạn.',
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.blue,
+                    colorText: Colors.white,
+                  );
+                },
+              ),
+            ],
           ),
           body: Obx(() {
             final lesson = controller.lesson.value;
@@ -229,57 +243,7 @@ class Exercise3Page extends StatelessWidget {
                         }
                         return const SizedBox.shrink();
                       }),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.center,
-                      //   children: [
-                      //     ElevatedButton(
-                      //       onPressed: () {
-                      //         Get.toNamed(
-                      //           Routes.exercise4,
-                      //           arguments: {
-                      //             'topic': controller.topic,
-                      //             'node': controller.node,
-                      //             'exercise': 4,
-                      //           },
-                      //         );
-                      //       },
-                      //       style: ElevatedButton.styleFrom(
-                      //         backgroundColor: Colors.green,
-                      //         padding: const EdgeInsets.symmetric(
-                      //           horizontal: 32,
-                      //           vertical: 12,
-                      //         ),
-                      //       ),
-                      //       child: const Text(
-                      //         'Tiếp tục',
-                      //         style: TextStyle(
-                      //           color: Colors.white,
-                      //           fontSize: 16,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //     const SizedBox(width: 16),
-                      //     ElevatedButton(
-                      //       onPressed: () {
-                      //         controller.resetState();
-                      //       },
-                      //       style: ElevatedButton.styleFrom(
-                      //         backgroundColor: Colors.blue,
-                      //         padding: const EdgeInsets.symmetric(
-                      //           horizontal: 32,
-                      //           vertical: 12,
-                      //         ),
-                      //       ),
-                      //       child: const Text(
-                      //         'Thử lại',
-                      //         style: TextStyle(
-                      //           color: Colors.white,
-                      //           fontSize: 16,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
+                      const SizedBox(height: 32),
 
                       const Spacer(),
                       // Nút ghi âm

@@ -75,31 +75,56 @@ class _AnimatedSettingDialogState extends State<_AnimatedSettingDialog> with Sin
             children: [
               Stack(
                 children: [
-                  const Center(
-                    child: Text(
-                      'Setting',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(top: 20, bottom: 10),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Setting',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                   ),
                   Positioned(
-                    right: 10, // Added spacing from right edge
-                    top: 10, // Added spacing from top edge
-                    child: IconButton(
-                      onPressed: () {
-                        SoundManager.playButtonSound();
-                        Get.back();
-                      },
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      padding: const EdgeInsets.all(8), // Internal padding for larger tap area
+                    right: 15,
+                    top: 15,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          SoundManager.playButtonSound();
+                          Get.back();
+                        },
+                        icon: const Icon(
+                          Icons.close, // Changed back to close (X) icon
+                          color: Colors.red,
+                          size: 30,
+                        ),
+                        padding: const EdgeInsets.all(6),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               // Avatar và Tên
               Obx(() => Row(
                     children: [

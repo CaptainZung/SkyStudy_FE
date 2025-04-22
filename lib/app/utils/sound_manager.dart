@@ -114,6 +114,31 @@ class SoundManager {
   static Future<void> playWrongSound() async {
     try {
       await _buttonPlayer.stop();
+      await _buttonPlayer.setAsset('assets/audio/wrong.mp3');
+      await _buttonPlayer.play();
+      logger.i('Phát âm thanh sai');
+    } catch (e) {
+      logger.e('Lỗi phát âm thanh sai: $e');
+      Get.snackbar('Lỗi', 'Không thể phát âm thanh sai: $e',
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+  static Future<void> playCorrectSound1() async {
+    try {
+      await _buttonPlayer.stop();
+      await _buttonPlayer.setAsset('assets/audio/correct1.mp3');
+      await _buttonPlayer.play();
+      logger.i('Phát âm thanh đúng');
+    } catch (e) {
+      logger.e('Lỗi phát âm thanh đúng: $e');
+      Get.snackbar('Lỗi', 'Không thể phát âm thanh đúng: $e',
+          snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  static Future<void> playWrongSound1() async {
+    try {
+      await _buttonPlayer.stop();
       await _buttonPlayer.setAsset('assets/audio/wrong1.mp3');
       await _buttonPlayer.play();
       logger.i('Phát âm thanh sai');

@@ -34,14 +34,7 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.blue.shade700, // Màu đầu tiên
-            Colors.blue.shade300, // Màu cuối cùng
-          ],
-          begin: Alignment.topLeft, // Định vị gradient từ trên trái
-          end: Alignment.bottomRight, // Định vị gradient tới dưới phải
-        ),
+        color: Colors.white, // Changed to white background
         border: const Border(
           top: BorderSide(
             color: Color.fromARGB(255, 0, 187, 255),
