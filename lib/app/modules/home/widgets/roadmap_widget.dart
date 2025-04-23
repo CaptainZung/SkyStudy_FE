@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skystudy/app/modules/home/widgets/chest_controller.dart';
 import 'package:skystudy/app/modules/home/home_controller.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
@@ -35,10 +36,12 @@ class _RoadmapWidgetState extends State<RoadmapWidget> {
   int currentTopicIndex = 0;
   late PageController _pageController;
   final Logger logger = Logger();
+  late ChestController chestController;
 
   @override
   void initState() {
     super.initState();
+    chestController = Get.put(ChestController());
     _pageController = PageController(initialPage: 0);
     _loadNodeStatus();
     SoundManager.init().then((_) {
@@ -130,8 +133,7 @@ class _RoadmapWidgetState extends State<RoadmapWidget> {
   }
 
   Future<void> _loadNextTopic(int nextIndex) async {
-    if (nextIndex < topics.length &&
-        !loadedTopics.contains(topics[nextIndex])) {
+    if (nextIndex < topics.length && !loadedTopics.contains(topics[nextIndex])) {
       setState(() {
         isLoadingNext = true;
       });
@@ -148,160 +150,163 @@ class _RoadmapWidgetState extends State<RoadmapWidget> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
         : PageView.builder(
-          controller: _pageController,
-          scrollDirection: Axis.vertical,
-          onPageChanged: (index) async {
-            setState(() {
-              currentTopicIndex = index;
-            });
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            reverse: true,
+            onPageChanged: (index) async {
+              setState(() {
+                currentTopicIndex = index;
+              });
 
-            widget.onTopicChanged(currentTopicIndex);
+              widget.onTopicChanged(currentTopicIndex);
 
-            if (index == loadedTopics.length - 1 && index < topics.length - 1) {
-              await _loadNextTopic(index + 1);
-            }
-          },
-          itemCount: loadedTopics.length + (isLoadingNext ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (isLoadingNext && index == loadedTopics.length) {
-              return const Center(child: CircularProgressIndicator());
-            }
+              if (index == loadedTopics.length - 1 && index < topics.length - 1) {
+                await _loadNextTopic(index + 1);
+              }
+            },
+            itemCount: loadedTopics.length + (isLoadingNext ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (isLoadingNext && index == loadedTopics.length) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-            String currentTopic = loadedTopics[index];
-            int topicIndex = topics.indexOf(currentTopic);
-            int baseNodeIndex = topicIndex * 5;
+              String currentTopic = loadedTopics[index];
+              int topicIndex = topics.indexOf(currentTopic);
+              int baseNodeIndex = topicIndex * 5;
 
-            return Container(
-              child: SafeArea(
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Text(
-                          currentTopic,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black54,
-                                offset: Offset(2, 2),
-                                blurRadius: 4,
-                              ),
-                            ],
+              return Container(
+                child: SafeArea(
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 20,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Text(
+                            currentTopic,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black54,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 80,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: List.generate(5, (nodeIndex) {
-                            int nodeInTopic = 4 - nodeIndex;
-                            int actualNodeIndex = baseNodeIndex + nodeInTopic;
-                            bool isLocked = nodeStatus[actualNodeIndex] == 0;
-                            bool isEven = nodeInTopic % 2 == 0;
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 80,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: List.generate(5, (nodeIndex) {
+                              int nodeInTopic = 4 - nodeIndex;
+                              int actualNodeIndex = baseNodeIndex + nodeInTopic;
+                              bool isLocked = nodeStatus[actualNodeIndex] == 0;
+                              bool isEven = nodeInTopic % 2 == 0;
 
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                              ), // Giảm padding để tiết kiệm không gian
-                              child: Align(
-                                alignment:
-                                    isEven
-                                        ? Alignment.centerLeft
-                                        : Alignment.centerRight,
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                    left: isEven ? 70 : 0,
-                                    right: isEven ? 0 : 70,
-                                  ),
-                                  child:
-                                      nodeInTopic == 4
-                                          ? GestureDetector(
-                                            onTap: null,
-                                            child: Image.asset(
-                                              'assets/icons/chest.png',
-                                              width: 80,
-                                              height: 80,
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                child: Align(
+                                  alignment: isEven ? Alignment.centerLeft : Alignment.centerRight,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: isEven ? 70 : 0,
+                                      right: isEven ? 0 : 70,
+                                    ),
+                                    child: nodeInTopic == 4
+                                        ? GestureDetector(
+                                            onTapDown: (_) {
+                                              setState(() {
+                                                nodeScales[actualNodeIndex] = 0.9;
+                                              });
+                                            },
+                                            onTapUp: (_) async {
+                                              setState(() {
+                                                nodeScales[actualNodeIndex] = 1.0;
+                                              });
+
+                                              await chestController.openMysteryChest(
+                                                topic: currentTopic,
+                                                nodeIndex: actualNodeIndex,
+                                                nodeStatus: nodeStatus,
+                                                baseNodeIndex: baseNodeIndex,
+                                                updateNodeStatus: (int nodeIndex) {
+                                                  setState(() {
+                                                    nodeStatus[nodeIndex] = 2;
+                                                  });
+                                                  _saveNodeStatus();
+                                                },
+                                              );
+                                            },
+                                            child: AnimatedScale(
+                                              scale: nodeScales[actualNodeIndex],
+                                              duration: const Duration(milliseconds: 200),
+                                              child: Image.asset(
+                                                nodeStatus[actualNodeIndex] == 2
+                                                    ? 'assets/icons/chest_open.png'
+                                                    : 'assets/icons/chest.png',
+                                                width: 80,
+                                                height: 80,
+                                              ),
                                             ),
                                           )
-                                          : Stack(
+                                        : Stack(
                                             alignment: Alignment.center,
                                             children: [
                                               GestureDetector(
-                                                onTapDown:
-                                                    isLocked
-                                                        ? null
-                                                        : (_) {
-                                                          setState(() {
-                                                            nodeScales[actualNodeIndex] =
-                                                                0.9;
-                                                          });
-                                                        },
-                                                onTapUp:
-                                                    isLocked
-                                                        ? null
-                                                        : (_) {
-                                                          setState(() {
-                                                            nodeScales[actualNodeIndex] =
-                                                                1.0;
-                                                          });
-                                                          SoundManager.playButtonSound();
-                                                          Get.toNamed(
-                                                            Routes.exercise1,
-                                                            arguments: {
-                                                              'topic':
-                                                                  currentTopic,
-                                                              'node':
-                                                                  nodeInTopic +
-                                                                  1,
-                                                            },
-                                                          )?.then((result) {
-                                                            logger.i(
-                                                              'Result from exercise1 (Node $actualNodeIndex, Topic $currentTopic): $result',
-                                                            );
-                                                            if (result ==
-                                                                true) {
-                                                              completeNode(
-                                                                actualNodeIndex,
-                                                              );
-                                                            }
-                                                          });
-                                                        },
+                                                onTapDown: isLocked
+                                                    ? null
+                                                    : (_) {
+                                                        setState(() {
+                                                          nodeScales[actualNodeIndex] = 0.9;
+                                                        });
+                                                      },
+                                                onTapUp: isLocked
+                                                    ? null
+                                                    : (_) {
+                                                        setState(() {
+                                                          nodeScales[actualNodeIndex] = 1.0;
+                                                        });
+                                                        SoundManager.playButtonSound();
+                                                        Get.toNamed(
+                                                          Routes.exercise1,
+                                                          arguments: {
+                                                            'topic': currentTopic,
+                                                            'node': nodeInTopic + 1,
+                                                          },
+                                                        )?.then((result) {
+                                                          logger.i(
+                                                            'Result from exercise1 (Node $actualNodeIndex, Topic $currentTopic): $result',
+                                                          );
+                                                          if (result == true) {
+                                                            completeNode(actualNodeIndex);
+                                                          }
+                                                        });
+                                                      },
                                                 child: AnimatedScale(
-                                                  scale:
-                                                      nodeScales[actualNodeIndex],
-                                                  duration: const Duration(
-                                                    milliseconds: 200,
-                                                  ),
+                                                  scale: nodeScales[actualNodeIndex],
+                                                  duration: const Duration(milliseconds: 200),
                                                   child: Image.asset(
-                                                    getNodeIcon(
-                                                      nodeStatus[actualNodeIndex],
-                                                    ),
+                                                    getNodeIcon(nodeStatus[actualNodeIndex]),
                                                     width: 60,
                                                     height: 60,
-                                                    color:
-                                                        isLocked
-                                                            ? Colors.grey
-                                                                .withOpacity(
-                                                                  0.5,
-                                                                )
-                                                            : null,
-                                                    colorBlendMode:
-                                                        isLocked
-                                                            ? BlendMode.modulate
-                                                            : null,
+                                                    color: isLocked ? Colors.grey.withOpacity(0.5) : null,
+                                                    colorBlendMode: isLocked ? BlendMode.modulate : null,
                                                   ),
                                                 ),
                                               ),
@@ -309,23 +314,22 @@ class _RoadmapWidgetState extends State<RoadmapWidget> {
                                                 Icon(
                                                   Icons.lock,
                                                   size: 30,
-                                                  color: Colors.black
-                                                      .withOpacity(0.7),
+                                                  color: Colors.black.withOpacity(0.7),
                                                 ),
                                             ],
                                           ),
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
+                              );
+                            }),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        );
+              );
+            },
+          );
   }
 }

@@ -29,4 +29,27 @@ class ProgressService {
       throw Exception('Failed to fetch progress: ${response.statusCode}');
     }
   }
+
+  Future<String?> openMysteryChest(String topic) async {
+    final token = await AuthManager.getToken();
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/GetUserHighestLevel'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+        body: jsonEncode({'topic': topic}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data']['message'];
+      } else {
+        return 'Rương này đã mở rồi! hoặc chưa đủ điều kiện!';
+      }
+    } catch (e) {
+      return null;
+    }
+  }
 }
