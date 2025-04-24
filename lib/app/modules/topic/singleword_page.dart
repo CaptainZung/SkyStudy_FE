@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../global_widgets/appbar.dart';
 import '../global_widgets/bottom_navbar.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 
 class SingleWordPage extends StatelessWidget {
   const SingleWordPage({super.key});
@@ -153,7 +154,10 @@ class SingleWordPage extends StatelessWidget {
                   elevation: 4,
                 ),
                 onPressed: () {
-                  // Add practice functionality
+                  Get.toNamed(
+                    Routes.pronunciationcheck, // Sử dụng Routes.pronunciationcheck để tránh lỗi chính tả
+                    arguments: {'sampleSentence': word['word']}, // Truyền từ vựng qua arguments
+                  );
                 },
                 child: const Text(
                   'LUYỆN TẬP TỪ NÀY',

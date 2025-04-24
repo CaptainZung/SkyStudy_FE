@@ -6,8 +6,9 @@ import 'package:skystudy/app/modules/home/widgets/user_info_widget.dart';
 import 'package:skystudy/app/modules/home/widgets/lottie_animation_widget.dart';
 import 'package:skystudy/app/modules/home/widgets/action_buttons_widget.dart';
 import 'package:skystudy/app/modules/home/widgets/roadmap_widget.dart';
-//import 'package:skystudy/app/utils/sound_manager.dart';
 import 'package:skystudy/app/modules/menu/setting_controller.dart';
+import 'package:skystudy/app/modules/leaderboard/profile/profile_controller.dart';
+import 'package:skystudy/app/utils/sound_manager.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,6 +24,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     Get.put(SettingController());
+    Get.put(ProfileController()); // Initialize ProfileController
+    SoundManager.playMusic(); // Phát nhạc nền khi vào trang Home
+  }
+
+  @override
+  void dispose() {
+    SoundManager.stopMusic(); // Dừng nhạc khi thoát khỏi trang Home
+    super.dispose();
   }
 
   void updateBackground(String newBackground) {
@@ -54,7 +63,13 @@ class _HomePageState extends State<HomePage> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 10,
               left: 10,
-              child: UserInfoWidget(points: 1000),
+              child: Obx(() {
+                final profileController = Get.find<ProfileController>();
+                return UserInfoWidget(
+                  points: profileController.points.value,
+                  username: profileController.username.value,
+                );
+              }),
             ),
             LottieAnimationWidget(),
             Positioned(
@@ -64,7 +79,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Positioned(
               top: MediaQuery.of(context).padding.top + 80,
-              left: 50,
+              left: 70,
               right: 0,
               bottom:
                   bottomNavHeight, // Để lại không gian cho CustomBottomNavBar

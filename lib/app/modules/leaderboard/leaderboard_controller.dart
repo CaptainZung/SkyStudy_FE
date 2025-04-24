@@ -75,4 +75,10 @@ class LeaderboardController extends GetxController {
     const maxPoints = 1250;
     return (points / maxPoints).clamp(0.0, 1.0);
   }
+
+  int getUserPosition(String currentUser) {
+    return leaderboardData.indexWhere(
+      (player) => player['name'].trim().toLowerCase() == currentUser.trim().toLowerCase(),
+    ) + 1; // Add 1 to make it 1-based rank
+  }
 }

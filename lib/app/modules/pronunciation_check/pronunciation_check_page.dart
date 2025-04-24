@@ -153,9 +153,7 @@ class PronunciationCheckPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton(
-                              onPressed: () {
-                                Get.snackbar('Thông báo', 'Đã lưu kết quả.');
-                              },
+                              onPressed: controller.handleSaveButton, // Gọi hàm handleSaveButton
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -244,7 +242,7 @@ class PronunciationCheckPage extends StatelessWidget {
                     ),
                   );
                 }
-                return const SizedBox.shrink();
+                return const SizedBox.shrink(); // Dừng animation ngay khi isProcessing = false
               }),
             ],
           ),

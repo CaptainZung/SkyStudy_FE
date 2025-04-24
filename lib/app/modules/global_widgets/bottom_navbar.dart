@@ -34,7 +34,15 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, // Changed to white background
+        // Replaced background color with a light gradient
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFF0F8FF), // Light color (AliceBlue)
+            Colors.white,
+          ],
+        ),
         border: const Border(
           top: BorderSide(
             color: Color.fromARGB(255, 0, 187, 255),

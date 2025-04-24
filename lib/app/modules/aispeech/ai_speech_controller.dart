@@ -118,16 +118,24 @@ class AISpeechController extends GetxController {
   }
 
   Future<void> _startHighlighting() async {
-    for (int i = 0; i < words.length; i++) {
-      if (!isPlaying.value) break; // Dừng highlight nếu không còn phát
-      highlightedWordIndex.value = i;
-      await Future.delayed(const Duration(milliseconds: 400));
-    }
-    if (isPlaying.value) {
+    audioPlayer.onPositionChanged.listen((Duration position) async {
+      if (!isPlaying.value) return;
+
+      // Await the duration and calculate the word index
+      Duration? totalDuration = await audioPlayer.getDuration();
+      if (totalDuration != null) {
+        int wordIndex = (position.inMilliseconds / totalDuration.inMilliseconds * words.length).floor();
+        if (wordIndex < words.length) {
+          highlightedWordIndex.value = wordIndex;
+        }
+      }
+    });
+
+    audioPlayer.onPlayerComplete.listen((event) {
       isPlaying.value = false;
       isPaused.value = false;
       highlightedWordIndex.value = -1;
-    }
+    });
   }
 
   Future<void> _continueHighlighting() async {

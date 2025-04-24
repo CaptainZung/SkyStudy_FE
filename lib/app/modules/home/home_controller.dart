@@ -27,7 +27,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadProgress();
+    loadProgressFromAPI(); // Preload all progress data from the API
   }
 
   final ProgressService progressService = ProgressService();
@@ -77,13 +77,32 @@ class HomeController extends GetxController {
       final result = await progressService.fetchUserProgress();
       currentTopic.value = result['topic'];
       currentNode.value = result['node'];
+
+      // Preload progress for all topics
+      if (result['progress'] != null) {
+        for (var topic in topics) {
+          topicProgress[topic] = result['progress'][topic] ?? 1;
+        }
+      } else {
+        logger.w('Progress data is null, initializing with default values');
+        for (var topic in topics) {
+          topicProgress[topic] = 1; // Default to 1 if no progress data is available
+        }
+      }
+
       logger.i('Loaded progress: topic=${result['topic']}, node=${result['node']}');
     } catch (e) {
       logger.e('Error loading progress from API: $e');
-      // Fallback: Tải tiến độ từ SharedPreferences nếu API thất bại
+      // Fallback: Load progress from SharedPreferences if API fails
       final prefs = await SharedPreferences.getInstance();
-      currentTopic.value = prefs.getString('last_topic') ?? topics[0]; // Mặc định là topic đầu tiên
-      currentNode.value = prefs.getInt('last_node') ?? 1; // Mặc định là node 1
+      currentTopic.value = prefs.getString('last_topic') ?? topics[0]; // Default to the first topic
+      currentNode.value = prefs.getInt('last_node') ?? 1; // Default to node 1
+
+      // Load progress for all topics from local storage
+      for (var topic in topics) {
+        topicProgress[topic] = prefs.getInt('progress_$topic') ?? 1;
+      }
+
       logger.i('Loaded progress from local: topic=${currentTopic.value}, node=${currentNode.value}');
     }
   }

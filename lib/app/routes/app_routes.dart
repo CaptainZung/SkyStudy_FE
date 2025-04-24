@@ -18,4 +18,5 @@ abstract class Routes {
   static const exercise3 = '/exercise3';
   static const exercise4 = '/exercise4';
   static const leaderboard = '/leaderboard';
+  static const profile = '/profile';
 }

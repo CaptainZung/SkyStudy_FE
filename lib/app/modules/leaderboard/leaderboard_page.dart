@@ -54,9 +54,10 @@ class LeaderboardPage extends StatelessWidget {
                 }
 
                 final currentUser = snapshot.data!;
-                int userPosition = controller.leaderboardData.indexWhere(
-                  (player) => player['name'] == currentUser,
-                );
+                int userPosition = controller.getUserPosition(currentUser);
+                if (userPosition == 0) {
+                  userPosition = -1; // Ensure it shows 'Chưa có xếp hạng' if not found
+                }
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -135,14 +136,27 @@ class LeaderboardPage extends StatelessWidget {
                                         horizontal: 16,
                                         vertical: 6,
                                       ),
-                                      leading: CircleAvatar(
-                                        backgroundColor: const Color(0xFF8FEFFF)
-                                            .withOpacity(0.3),
-                                        radius: 22,
-                                        child: Text(
-                                          player['avatar'],
-                                          style: const TextStyle(fontSize: 20),
-                                        ),
+                                      leading: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '${index + 1}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          CircleAvatar(
+                                            backgroundColor: const Color(0xFF8FEFFF).withOpacity(0.3),
+                                            radius: 22,
+                                            child: Text(
+                                              player['avatar'],
+                                              style: const TextStyle(fontSize: 20),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       title: Text(
                                         player['name'],
@@ -235,7 +249,7 @@ class LeaderboardPage extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    userPosition != -1
+                                    userPosition >= 0
                                         ? 'Hạng ${userPosition + 1}'
                                         : 'Chưa có xếp hạng',
                                     style: const TextStyle(

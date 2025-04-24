@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skystudy/app/api/ai_api.dart';
+import 'package:skystudy/app/modules/pronunciation_check/pronunciation_check_service.dart';
+import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
 
 class PronunciationCheckController extends GetxController {
@@ -28,14 +30,15 @@ class PronunciationCheckController extends GetxController {
   audioplayers.AudioPlayer _audioPlayer = audioplayers.AudioPlayer();
   List<int>? _recordedAudioBytes;
   StreamController<Uint8List>? _streamController;
+  final PronunciationCheckService _service = PronunciationCheckService(); 
 
   @override
   void onInit() {
     super.onInit();
     _recorder = flutter_sound.FlutterSoundRecorder();
     _initRecorder();
-    final Map<String, dynamic> args = Get.arguments ?? {};
-    sampleSentence = args['sampleSentence']?.toString() ?? '';
+    final Map<String, dynamic> args = Get.arguments ?? {}; // Đảm bảo Get.arguments không null
+    sampleSentence = args['sampleSentence']?.toString() ?? ''; // Lấy từ vựng từ arguments
     if (sampleSentence.isNotEmpty) {
       fetchAudio();
     }
@@ -142,7 +145,7 @@ class PronunciationCheckController extends GetxController {
       print("Lỗi client: $e");
       Get.snackbar('Lỗi', 'Lỗi khi kiểm tra phát âm: $e');
     } finally {
-      isProcessing.value = false;
+      isProcessing.value = false; // Đảm bảo trạng thái được cập nhật ngay lập tức
     }
   }
 
@@ -182,6 +185,28 @@ class PronunciationCheckController extends GetxController {
         Get.snackbar('Lỗi', 'Lỗi khi phát âm thanh: $e');
         isPlayingTts.value = false;
       }
+    }
+  }
+
+  Future<void> handleSaveButton() async {
+    if (sampleSentence.isEmpty) {
+      Get.snackbar('Lỗi', 'Không có từ để lưu!');
+      return;
+    }
+
+    try {
+      // Chuẩn bị từ để gửi (loại bỏ ký tự đặc biệt nếu cần)
+      String wordToSave = sampleSentence.replaceAll(RegExp(r'[^\w\s]'), '').trim();
+
+      // Gọi hàm fetchUserProgress từ service
+      final message = await _service.SaveWord(wordToSave);
+      Get.snackbar('Thành công', 'Đã lưu từ: $wordToSave');
+
+      // Hiển thị thông báo thành công
+      Get.offAllNamed(Routes.dictionary);
+    } catch (e) {
+      // Hiển thị thông báo lỗi
+      Get.snackbar('Lỗi', 'Lỗi khi lưu từ: $e');
     }
   }
 

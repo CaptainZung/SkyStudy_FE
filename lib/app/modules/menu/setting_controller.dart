@@ -33,7 +33,7 @@ class SettingController extends GetxController {
   // Tải tên và ảnh từ SharedPreferences
   Future<void> loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    userName.value = prefs.getString('user_name') ?? 'Dũng';
+    userName.value = prefs.getString('user_name') ?? '';
     avatarPath.value = prefs.getString('avatar_path') ?? '';
   }
 
@@ -43,21 +43,9 @@ class SettingController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_name', nameController.text);
       userName.value = nameController.text;
-      isEditingName.value = false;
+
     }
   }
-
-  // Bắt đầu chỉnh sửa tên
-  void startEditName() {
-    isEditingName.value = true;
-  }
-
-  // Hủy chỉnh sửa tên
-  void cancelEditName() {
-    isEditingName.value = false;
-    nameController.text = userName.value;
-  }
-
   // Chọn ảnh từ thư viện
   Future<void> pickImage() async {
     try {

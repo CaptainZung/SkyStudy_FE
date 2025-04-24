@@ -32,7 +32,7 @@ class Exercise3Controller extends GetxController {
   var isPlayingSampleSentence = false.obs;
   var lottieAnimationPath = ''.obs;
   var feedbackMessage = ''.obs;
-  var enableContinueButton = false.obs;
+  var enableContinueButton = true.obs;
 
   List<int>? _recordedAudioBytes;
   StreamController<Uint8List>? _streamController;
@@ -167,9 +167,9 @@ class Exercise3Controller extends GetxController {
 
         // Play sound after UI is updated
         if (accuracy.value >= 0.8) {
-          await SoundManager.playCorrectSound();
+          await SoundManager.playCorrectSound1();
         } else {
-          await SoundManager.playWrongSound();
+          await SoundManager.playWrongSound1();
         }
 
         logger.i('✅ Kết quả từ server:');
@@ -238,7 +238,7 @@ class Exercise3Controller extends GetxController {
     isPlayingTts.value = false;
     lottieAnimationPath.value = '';
     feedbackMessage.value = '';
-    enableContinueButton.value = false;
+    enableContinueButton.value = true;
   }
 
   void goToNextExercise() {

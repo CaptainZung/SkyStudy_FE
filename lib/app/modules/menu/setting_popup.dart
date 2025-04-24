@@ -176,55 +176,31 @@ class _AnimatedSettingDialogState extends State<_AnimatedSettingDialog> with Sin
                       const SizedBox(width: 10),
                       // Tên và nút chỉnh sửa
                       Expanded(
-                        child: widget.controller.isEditingName.value
-                            ? Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: widget.controller.nameController,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Nhập tên mới',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      SoundManager.playButtonSound();
-                                      widget.controller.saveUserName();
-                                    },
-                                    icon: const Icon(Icons.check, color: Colors.green),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      SoundManager.playButtonSound();
-                                      widget.controller.cancelEditName();
-                                    },
-                                    icon: const Icon(Icons.cancel, color: Colors.red),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                children: [
-                                  Text(
-                                    widget.controller.userName.value,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    onPressed: () {
-                                      SoundManager.playButtonSound();
-                                      widget.controller.startEditName();
-                                    },
-                                    icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
-                                  ),
-                                ],
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.controller.userName.value,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                SoundManager.playButtonSound();
+                                Get.toNamed('/profile'); // Điều hướng đến ProfilePage
+                              },
+                              icon: const Icon(
+                                Icons.edit,
+                                size: 20,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   )),

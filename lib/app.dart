@@ -38,13 +38,7 @@ class SkyStudyAppState extends State<SkyStudyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.detached) {
-      // App is being closed
-      SoundManager.stop();
-    } else if (state == AppLifecycleState.paused) {
-      // App is in background
-      SoundManager.stopMusic();
-    }
+    // Removed SoundManager.stopMusic() to allow music to continue playing in the background
   }
 
   Future<String> _determineInitialRoute() async {

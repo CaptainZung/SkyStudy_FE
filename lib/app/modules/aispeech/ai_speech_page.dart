@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:skystudy/app/modules/global_widgets/appbar.dart';
+import 'package:skystudy/app/utils/sound_manager.dart';
 import 'ai_speech_controller.dart';
 
 class AISpeechPage extends StatelessWidget {
@@ -13,7 +14,7 @@ class AISpeechPage extends StatelessWidget {
       builder: (controller) {
         return Scaffold(
           appBar: const CustomAppBar(
-            title: 'AI Speech',
+            title: 'Tạo câu bằng AI',
             backgroundColor: Colors.blue,
             showBackButton: true,
           ),
@@ -22,32 +23,69 @@ class AISpeechPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Câu tiếng Anh với hiệu ứng đổi màu
+                // Câu tiếng Anh và tiếng Việt với thiết kế đẹp hơn
                 Obx(() {
-                  return Wrap(
-                    spacing: 4.0,
-                    children: controller.words.asMap().entries.map((entry) {
-                      int index = entry.key;
-                      String word = entry.value;
-                      // Highlight tất cả các từ từ đầu đến vị trí hiện tại
-                      bool isHighlighted = controller.highlightedWordIndex.value >= index;
-                      return Text(
-                        '$word ', // Thêm khoảng trắng để tách từ
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: isHighlighted ? Colors.green : Colors.red,
-                          fontWeight: FontWeight.bold,
+                  return Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      );
-                    }).toList(),
+                        child: SizedBox(
+                          height: 120, // Tăng chiều cao để tránh chữ bị che
+                          child: Text.rich(
+                            TextSpan(
+                              children: controller.sentence.split(' ').asMap().entries.map((entry) {
+                                int wordIndex = entry.key;
+                                String word = entry.value;
+                                bool isHighlighted = controller.isPlaying.value && controller.highlightedWordIndex.value == wordIndex;
+                                return TextSpan(
+                                  text: '$word ',
+                                  style: TextStyle(
+                                    fontSize: isHighlighted ? 22 : 18,
+                                    color: isHighlighted ? Colors.green : Colors.black,
+                                    fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          controller.translatedSentence,
+                          style: const TextStyle(fontSize: 16, color: Colors.black54),
+                        ),
+                      ),
+                    ],
                   );
                 }),
-                const SizedBox(height: 16),
-                // Câu tiếng Việt
-                Text(
-                  controller.translatedSentence,
-                  style: const TextStyle(fontSize: 16, color: Colors.black54),
-                ),
                 const SizedBox(height: 16),
                 // Nút phát âm thanh và nút chuyển đổi giọng nói
                 Row(
@@ -56,9 +94,10 @@ class AISpeechPage extends StatelessWidget {
                     // Nút phát/tạm dừng âm thanh
                     Obx(() {
                       return ElevatedButton.icon(
-                        onPressed: controller.isPlaying.value
-                            ? () => controller.pauseAudio()
-                            : () => controller.playAudio(),
+                        onPressed: () {
+                          SoundManager.playButtonSound();
+                          controller.isPlaying.value ? controller.pauseAudio() : controller.playAudio();
+                        },
                         icon: Icon(
                           controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
                           color: Colors.white,
@@ -70,6 +109,9 @@ class AISpeechPage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       );
                     }),
@@ -77,7 +119,10 @@ class AISpeechPage extends StatelessWidget {
                     // Nút chuyển đổi giọng nói
                     Obx(() {
                       return ElevatedButton.icon(
-                        onPressed: () => controller.toggleVoice(),
+                        onPressed: () {
+                          SoundManager.playButtonSound();
+                          controller.toggleVoice();
+                        },
                         icon: Icon(
                           controller.selectedVoice.value == 'female' ? Icons.female : Icons.male,
                           color: Colors.white,
@@ -89,6 +134,9 @@ class AISpeechPage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       );
                     }),

@@ -30,7 +30,8 @@ import '../modules/exercises/exercise_4/exercise_4_page.dart';
 import '../modules/exercises/exercise_4/exercise_4_binding.dart';
 import '../modules/leaderboard/leaderboard_page.dart';
 import '../modules/leaderboard/leaderboard_binding.dart';
-
+import '../modules/leaderboard/profile/profile_page.dart';
+import '../modules/leaderboard/profile/profile_binding.dart';
 
 part 'app_routes.dart';
 
@@ -55,5 +56,6 @@ class AppPages {
     GetPage(name: Routes.exercise3, page: () => const Exercise3Page(), binding: Exercise3Binding()),
     GetPage(name: Routes.exercise4, page: () => const Exercise4Page(), binding: Exercise4Binding()),
     GetPage(name: Routes.leaderboard, page: () => const LeaderboardPage(), binding: LeaderboardBinding()),
+    GetPage(name: Routes.profile, page: () => const ProfilePage(), binding: ProfileBinding()),
   ];
 }

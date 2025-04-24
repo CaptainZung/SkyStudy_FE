@@ -5,8 +5,9 @@ import 'dart:io';
 
 class UserInfoWidget extends StatelessWidget {
   final int points;
+  final String username;
 
-  const UserInfoWidget({super.key, required this.points});
+  const UserInfoWidget({super.key, required this.points, required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +74,7 @@ class UserInfoWidget extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  settingController.userName.value,
+                  username,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,

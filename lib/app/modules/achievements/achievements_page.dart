@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'achievements_controller.dart';
 import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart'; // Import the updated CustomBottomNavBar
 import 'package:skystudy/app/modules/global_widgets/appbar.dart'; // Import the updated CustomAppBar
+import 'package:skystudy/app/utils/sound_manager.dart'; // Import SoundManager for background music
 
 class AchievementsPage extends StatelessWidget {
   const AchievementsPage({super.key});
