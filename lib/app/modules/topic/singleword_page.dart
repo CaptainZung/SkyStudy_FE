@@ -9,7 +9,7 @@ class SingleWordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> word = Get.arguments;
-    final theme = Theme.of(context);
+    Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(

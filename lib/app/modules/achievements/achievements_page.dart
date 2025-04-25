@@ -1,14 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:skystudy/app/modules/achievements/achievements_controller.dart';
+import 'package:skystudy/app/modules/achievements/achievement_item.dart';
+import 'package:skystudy/app/modules/global_widgets/appbar.dart';
 import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
+
+
 class AchievementsPage extends StatelessWidget {
   const AchievementsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Achievements')),
-      body: Center(child: Text('Achievements Screen', style: TextStyle(fontSize: 24))),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
+    return GetBuilder<AchievementsController>(
+      tag: 'AchievementsController',
+      builder: (controller) {
+        if (controller == null) {
+          return const Scaffold(
+            body: Center(child: Text('Không tìm thấy AchievementsController')),
+          );
+        }
+        return Scaffold(
+          appBar: CustomAppBar(
+            title: 'Achievements',
+            backgroundColor: Colors.blue,
+            showBackButton: false,
+          ),
+          body: controller.achievements.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: controller.fetchAchievements,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: controller.achievements.length,
+                    itemBuilder: (context, index) {
+                      final achievement = controller.achievements[index];
+                      return AchievementItem(achievement: achievement);
+                    },
+                  ),
+                ),
+          bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
+        );
+      },
     );
   }
 }

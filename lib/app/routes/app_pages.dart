@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:skystudy/app/modules/achievements/achievements_binding.dart';
 import 'package:skystudy/app/modules/aispeech/ai_speech_binding.dart';
 import 'package:skystudy/app/modules/auth/register_binding.dart';
 import 'package:skystudy/app/modules/auth/register_page.dart';
@@ -41,7 +42,7 @@ class AppPages {
     GetPage(name: Routes.dictionary, page: () => const DictionaryPage(), binding: DictionaryBinding()),
     GetPage(name: Routes.detection, page: () => const DetectionPage()),
     GetPage(name: Routes.detectionresult, page: () => const DetectionResultPage(), binding: DetectionResultBinding()),
-    GetPage(name: Routes.achievements, page: () => const AchievementsPage()),
+    GetPage(name: Routes.achievements, page: () => const AchievementsPage(), binding: AchievementsBinding()),
     GetPage(name: Routes.topic, page: () => const TopicPage(), binding: TopicBinding()),
     GetPage(name: Routes.onboard, page: () => const OnboardingPage()),
     GetPage(name: Routes.realtime, page: () => const RealtimePage()),
