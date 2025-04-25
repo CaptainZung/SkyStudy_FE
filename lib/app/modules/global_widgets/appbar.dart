@@ -7,7 +7,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
   final PreferredSizeWidget? bottom;
   final TextStyle? titleStyle;
-  final List<Widget>? actions; // Add actions parameter
+  final List<Widget>? actions;
+  final VoidCallback? onBack; // <-- Thêm callback tùy chỉnh cho nút back
 
   const CustomAppBar({
     super.key,
@@ -16,7 +17,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = true,
     this.bottom,
     this.titleStyle,
-    this.actions, // Make actions optional
+    this.actions,
+    this.onBack, // <-- Gán callback
   });
 
   @override
@@ -24,8 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style:
-            titleStyle ??
+        style: titleStyle ??
             const TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -34,18 +35,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,
-      leading:
-          showBackButton
-              ? IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                ), // Biểu tượng mặc định
-                onPressed: () {
-                  Get.back();
-                },
-              )
-              : null,
+      leading: showBackButton
+          ? IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+              ),
+              onPressed: onBack ?? () => Get.back(), // <-- Ưu tiên callback
+            )
+          : null,
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -53,10 +51,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          // borderRadius: const BorderRadius.only(
-          //   bottomLeft: Radius.circular(20),
-          //   bottomRight: Radius.circular(20),
-          // ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -68,7 +62,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       bottom: bottom,
-      actions: actions, // Pass actions to AppBar
+      actions: actions,
     );
   }
 

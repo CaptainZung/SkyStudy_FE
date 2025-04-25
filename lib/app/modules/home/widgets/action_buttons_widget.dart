@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:skystudy/app/modules/daily_check/daily_check_controller.dart';
+import 'package:skystudy/app/modules/daily_check/daily_check_popup.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
 import 'package:skystudy/app/modules/menu/setting_popup.dart';
 import 'package:skystudy/app/modules/leaderboard/leaderboard_page.dart';
@@ -73,29 +75,43 @@ class ActionButtonsWidgetState extends State<ActionButtonsWidget> {
           ),
           const SizedBox(height: 10),
           GestureDetector(
-            onTapDown: (_) {
-              setState(() {
-                dailyCheckScale = 0.9;
-              });
-              logger.i('Daily Check button pressed down');
-            },
-            onTapUp: (_) {
-              setState(() {
-                dailyCheckScale = 1.0;
-              });
-              logger.i('Daily Check button pressed up');
-              SoundManager.playButtonSound();
-            },
-            child: AnimatedScale(
-              scale: dailyCheckScale,
-              duration: const Duration(milliseconds: 200),
-              child: Image.asset(
-                'assets/icons/dailycheck.png',
-                width: 50,
-                height: 50,
-              ),
-            ),
-          ),
+  onTapDown: (_) {
+    setState(() {
+      dailyCheckScale = 0.9;
+    });
+    logger.i('Daily Check button pressed down');
+  },
+  onTapUp: (_) {
+  setState(() {
+    dailyCheckScale = 1.0;
+  });
+  logger.i('Daily Check button pressed up');
+  SoundManager.playButtonSound();
+
+  // 👉 Đảm bảo khởi tạo controller trước khi gọi popup
+  if (!Get.isRegistered<DailyCheckController>()) {
+    Get.put(DailyCheckController());
+  }
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return const DailyCheckPopup();
+    },
+  );
+},
+
+  child: AnimatedScale(
+    scale: dailyCheckScale,
+    duration: const Duration(milliseconds: 200),
+    child: Image.asset(
+      'assets/icons/dailycheck.png',
+      width: 50,
+      height: 50,
+    ),
+  ),
+),
+
           const SizedBox(height: 10),
           GestureDetector(
             onTapDown: (_) {

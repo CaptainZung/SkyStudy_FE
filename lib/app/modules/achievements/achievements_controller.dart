@@ -1,17 +1,69 @@
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
+import 'package:skystudy/app/modules/achievements/achievements_service.dart';
+import 'package:skystudy/app/modules/achievements/achivement_model.dart';
 
 class AchievementsController extends GetxController {
-  final List<Map<String, dynamic>> achievements = [
-    {'title': 'Học 5 từ', 'progress': 0, 'total': 5, 'reward': 10},
-    {'title': 'Học 10 từ', 'progress': 0, 'total': 10, 'reward': 20},
-    {'title': 'Học 30 từ', 'progress': 0, 'total': 30, 'reward': 60},
-    {'title': 'Học 5 câu', 'progress': 5, 'total': 5, 'reward': 5},
-  ];
+  final AchievementApi _achievementApi = AchievementApi();
+  var achievements = <Achievement>[].obs; // Sử dụng RxList
 
-  final List<Map<String, dynamic>> dailyTasks = [
-    {'title': 'Học 5 từ', 'progress': 5, 'total': 5, 'reward': 10},
-    {'title': 'Học 10 từ', 'progress': 10, 'total': 10, 'reward': 20},
-    {'title': 'Học 30 từ', 'progress': 30, 'total': 30, 'reward': 60},
-    {'title': 'Học 5 câu', 'progress': 5, 'total': 5, 'reward': 5},
-  ];
+  // Khởi tạo logger
+  final Logger _logger = Logger(
+    printer: PrettyPrinter(
+      methodCount: 0,
+      errorMethodCount: 5,
+      lineLength: 120,
+      colors: true,
+      printEmojis: true,
+      printTime: true,
+    ),
+  );
+
+  AchievementsController() {
+    _logger.d('AchievementsController được khởi tạo');
+  }
+
+  @override
+  void onInit() {
+    _logger.d('onInit của AchievementsController được gọi');
+    super.onInit();
+    fetchAchievements();
+  }
+
+  Future<void> fetchAchievements() async {
+    try {
+      _logger.i('Bắt đầu lấy danh sách thành tựu');
+      final fetchedAchievements = await _achievementApi.getAchievements();
+      achievements.assignAll(fetchedAchievements); // Cập nhật RxList
+      _logger.i('Lấy danh sách thành tựu thành công: ${achievements.length} thành tựu');
+    } catch (e) {
+      _logger.e('Lỗi khi lấy danh sách thành tựu: $e');
+      Get.snackbar('Lỗi', 'Không thể tải danh sách thành tựu: $e');
+    }
+  }
+
+  Future<void> claimAchievement(int achievementId) async {
+    try {
+      _logger.i('Bắt đầu nhận thưởng thành tựu $achievementId');
+      final result = await _achievementApi.claimAchievement(achievementId);
+      final claimedAchievement = result.achievement;
+      final index = achievements.indexWhere((a) => a.id == achievementId);
+      if (index != -1) {
+        achievements[index] = Achievement(
+          id: achievements[index].id,
+          name: achievements[index].name,
+          type: achievements[index].type,
+          progress: achievements[index].progress,
+          status: achievements[index].status,
+          statusClaim: 'complete',
+          sticker: claimedAchievement.sticker,
+        );
+        _logger.i('Cập nhật thành tựu $achievementId thành công');
+      }
+      Get.snackbar('Thành công', 'Đã nhận thưởng thành tựu $achievementId!');
+    } catch (e) {
+      _logger.e('Lỗi khi nhận thưởng thành tựu $achievementId: $e');
+      Get.snackbar('Lỗi', 'Không thể nhận thưởng: $e');
+    }
+  }
 }

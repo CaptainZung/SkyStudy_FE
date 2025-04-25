@@ -32,7 +32,6 @@ import '../modules/leaderboard/leaderboard_page.dart';
 import '../modules/leaderboard/leaderboard_binding.dart';
 import '../modules/profile/profile_page.dart';
 import '../modules/profile/profile_binding.dart';
-
 part 'app_routes.dart';
 
 class AppPages {
