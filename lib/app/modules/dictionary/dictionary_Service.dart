@@ -42,7 +42,7 @@ class DictionaryApi {
   Future<List<Dictionary>> getWordByTopic(String topic) async {
     try {
       final url = Uri.parse(
-        '$baseUrl/getWordbyTopic',
+        '$baseUrl/getWordbyToppic',
       ); // Sửa URL cho khớp với backend
       final response = await http.post(
         url,

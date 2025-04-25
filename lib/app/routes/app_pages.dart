@@ -30,8 +30,8 @@ import '../modules/exercises/exercise_4/exercise_4_page.dart';
 import '../modules/exercises/exercise_4/exercise_4_binding.dart';
 import '../modules/leaderboard/leaderboard_page.dart';
 import '../modules/leaderboard/leaderboard_binding.dart';
-import '../modules/leaderboard/profile/profile_page.dart';
-import '../modules/leaderboard/profile/profile_binding.dart';
+import '../modules/profile/profile_page.dart';
+import '../modules/profile/profile_binding.dart';
 
 part 'app_routes.dart';
 

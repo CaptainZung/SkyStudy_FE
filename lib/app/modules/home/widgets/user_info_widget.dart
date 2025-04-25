@@ -1,57 +1,134 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:skystudy/app/modules/menu/setting_controller.dart';
-import 'dart:io';
+import 'package:skystudy/app/modules/profile/profile_controller.dart';
 
 class UserInfoWidget extends StatelessWidget {
-  final int points;
-  final String username;
-
-  const UserInfoWidget({super.key, required this.points, required this.username});
+  const UserInfoWidget({super.key}); // Loại bỏ tham số points và username
 
   @override
   Widget build(BuildContext context) {
     final SettingController settingController = Get.find<SettingController>();
+    final ProfileController profileController = Get.find<ProfileController>();
 
-    return Obx(
-      () => Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 4,
-                  offset: const Offset(2, 2),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: settingController.avatarPath.value.isNotEmpty
-                  ? Image.file(
-                      File(settingController.avatarPath.value),
-                      fit: BoxFit.cover,
-                      width: 60,
-                      height: 60,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/icons/default_avatar.png',
-                          fit: BoxFit.cover,
-                          width: 60,
-                          height: 60,
-                        );
+    void _showAvatarSelectionPopup(BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: SizedBox(
+                height: 300,
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: 20,
+                  itemBuilder: (context, index) {
+                    final avatarPath = 'assets/avatar/avatar_$index.png';
+                    return GestureDetector(
+                      onTap: () {
+                        settingController.avatarPath.value = avatarPath;
+                        Navigator.of(context).pop();
                       },
-                    )
-                  : Image.asset(
-                      'assets/icons/default_avatar.png',
-                      fit: BoxFit.cover,
-                      width: 60,
-                      height: 60,
-                    ),
+                      child: Image.asset(
+                        avatarPath,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    return Obx(() {
+      // Nếu đang tải, hiển thị vòng tròn loading
+      if (profileController.isLoading.value) {
+        return const Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 10),
+            Text(
+              'Loading...',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        );
+      }
+
+      // Nếu không có username (có thể do lỗi API), hiển thị thông báo lỗi
+      if (profileController.username.value.isEmpty) {
+        return const Row(
+          children: [
+            Icon(
+              Icons.error,
+              color: Colors.red,
+              size: 24,
+            ),
+            SizedBox(width: 10),
+            Text(
+              'Error loading user info',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        );
+      }
+
+      // Hiển thị thông tin người dùng khi dữ liệu đã tải xong
+      return Row(
+        children: [
+          GestureDetector(
+            onTap: () => _showAvatarSelectionPopup(context),
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: settingController.avatarPath.value.isNotEmpty
+                    ? Image.asset(
+                        settingController.avatarPath.value,
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                      )
+                    : Image.asset(
+                        'assets/icons/default_avatar.png',
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                      ),
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -74,7 +151,7 @@ class UserInfoWidget extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  username,
+                  profileController.username.value, // Lấy từ ProfileController
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -94,7 +171,7 @@ class UserInfoWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        '$points p',
+                        '${profileController.points.value} p', // Lấy từ ProfileController
                         style: const TextStyle(
                           color: Color(0xFF4A90E2),
                           fontSize: 14,
@@ -114,7 +191,7 @@ class UserInfoWidget extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      );
+    });
   }
 }

@@ -5,32 +5,43 @@ import 'package:lottie/lottie.dart';
 class LottieController extends GetxController {
   AnimationController? ufoController;
   AnimationController? dinoController;
+  AnimationController? idleController;
 
-  // Truyền TickerProvider ngay trong constructor
   void initialize(TickerProvider vsync) {
     ufoController = AnimationController(vsync: vsync);
     dinoController = AnimationController(vsync: vsync);
+    idleController = AnimationController(vsync: vsync);
   }
 
-  // Kiểm tra null trước khi start animations
-  void startAnimations(LottieComposition compositionUfo, LottieComposition compositionDino) {
+  void startMainAnimations(LottieComposition compositionUfo, LottieComposition compositionDino) {
     if (ufoController == null || dinoController == null) {
-      throw Exception('LottieController must be initialized before starting animations');
+      throw Exception('ufoController and dinoController must be initialized before starting');
     }
-
     ufoController!
       ..duration = compositionUfo.duration
       ..repeat();
-
     dinoController!
       ..duration = compositionDino.duration
       ..repeat();
   }
 
-  // Kiểm tra null trước khi stop
+  void startIdleAnimation(LottieComposition composition) {
+    if (idleController == null) {
+      throw Exception('idleController must be initialized before starting');
+    }
+    idleController!
+      ..duration = composition.duration
+      ..repeat();
+  }
+
+  void stopIdleAnimation() {
+    idleController?.stop();
+  }
+
   void stopAnimations() {
     ufoController?.stop();
     dinoController?.stop();
+    idleController?.stop();
   }
 
   @override
@@ -39,6 +50,8 @@ class LottieController extends GetxController {
     ufoController = null;
     dinoController?.dispose();
     dinoController = null;
+    idleController?.dispose();
+    idleController = null;
     super.onClose();
   }
 }

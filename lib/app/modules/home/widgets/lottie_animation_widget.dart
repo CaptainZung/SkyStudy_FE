@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:skystudy/app/controllers/lottie_controller.dart';
 
 class LottieAnimationWidget extends StatefulWidget {
-  const LottieAnimationWidget({super.key});
+  const LottieAnimationWidget({super.key}); // Xóa tham số isIdle
 
   @override
   LottieAnimationWidgetState createState() => LottieAnimationWidgetState();
@@ -44,7 +44,7 @@ class LottieAnimationWidgetState extends State<LottieAnimationWidget> with Ticke
             onLoaded: (composition) {
               _ufoComposition = composition;
               if (_dinoComposition != null) {
-                lottieController.startAnimations(
+                lottieController.startMainAnimations(
                   _ufoComposition!,
                   _dinoComposition!,
                 );
@@ -64,7 +64,7 @@ class LottieAnimationWidgetState extends State<LottieAnimationWidget> with Ticke
             onLoaded: (composition) {
               _dinoComposition = composition;
               if (_ufoComposition != null) {
-                lottieController.startAnimations(
+                lottieController.startMainAnimations(
                   _ufoComposition!,
                   _dinoComposition!,
                 );

@@ -128,14 +128,15 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     _saveNodeStatus();
   }
 
-  void _navigateToExercise(String currentTopic, int nodeInTopic, int actualNodeIndex) {
+  void _navigateToExercise(
+    String currentTopic,
+    int nodeInTopic,
+    int actualNodeIndex,
+  ) {
     SoundManager.pauseMusic(); // Tạm dừng nhạc khi vào bài tập
     Get.toNamed(
       Routes.exercise1,
-      arguments: {
-        'topic': currentTopic,
-        'node': nodeInTopic + 1,
-      },
+      arguments: {'topic': currentTopic, 'node': nodeInTopic + 1},
     )?.then((result) {
       logger.i(
         'Result from exercise1 (Node $actualNodeIndex, Topic $currentTopic): $result',
@@ -152,188 +153,198 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     return isLoading
         ? const Center(child: CircularProgressIndicator())
         : PageView.builder(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            reverse: true,
-            onPageChanged: (index) {
-              setState(() {
-                currentTopicIndex = index;
-              });
+          controller: _pageController,
+          scrollDirection: Axis.vertical,
+          reverse: true,
+          onPageChanged: (index) {
+            setState(() {
+              currentTopicIndex = index;
+            });
 
-              widget.onTopicChanged(currentTopicIndex);
-            },
-            itemCount: loadedTopics.length,
-            itemBuilder: (context, index) {
-              String currentTopic = loadedTopics[index];
-              int topicIndex = topics.indexOf(currentTopic);
-              int baseNodeIndex = topicIndex * 5;
+            widget.onTopicChanged(currentTopicIndex);
+          },
+          itemCount: loadedTopics.length,
+          itemBuilder: (context, index) {
+            String currentTopic = loadedTopics[index];
+            int topicIndex = topics.indexOf(currentTopic);
+            int baseNodeIndex = topicIndex * 5;
 
-              return Container(
-                child: SafeArea(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + 20,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Text(
-                            currentTopic,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black54,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 4,
-                                ),
-                              ],
-                            ),
+            return Container(
+              child: SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top + 20,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Text(
+                          currentTopic,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black54,
+                                offset: Offset(2, 2),
+                                blurRadius: 4,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + 80,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: List.generate(5, (nodeIndex) {
-                              int nodeInTopic = 4 - nodeIndex;
-                              int actualNodeIndex = baseNodeIndex + nodeInTopic;
-                              bool isLocked = nodeStatus[actualNodeIndex] == 0;
-                              bool isEven = nodeInTopic % 2 == 0;
+                    ),
+                    Positioned(
+                      top: MediaQuery.of(context).padding.top + 80,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: List.generate(5, (nodeIndex) {
+                            int nodeInTopic = 4 - nodeIndex;
+                            int actualNodeIndex = baseNodeIndex + nodeInTopic;
+                            bool isLocked = nodeStatus[actualNodeIndex] == 0;
+                            bool isEven = nodeInTopic % 2 == 0;
 
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ), // Giảm padding để tiết kiệm không gian
-                                child: Align(
-                                  alignment:
-                                      isEven
-                                          ? Alignment.centerLeft
-                                          : Alignment.centerRight,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      left: isEven ? 70 : 0,
-                                      right: isEven ? 0 : 70,
-                                    ),
-                                    child:
-                                        nodeInTopic == 4
-    ? GestureDetector(
-        onTapDown: (_) {
-          setState(() {
-            nodeScales[actualNodeIndex] = 0.9;
-          });
-        },
-        onTapUp: (_) async {
-          setState(() {
-            nodeScales[actualNodeIndex] = 1.0;
-          });
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                              ), // Giảm padding để tiết kiệm không gian
+                              child: Align(
+                                alignment:
+                                    isEven
+                                        ? Alignment.centerLeft
+                                        : Alignment.centerRight,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    left: isEven ? 70 : 0,
+                                    right: isEven ? 0 : 70,
+                                  ),
+                                  child:
+                                      nodeInTopic == 4
+                                          ? GestureDetector(
+                                            onTapDown: (_) {
+                                              setState(() {
+                                                nodeScales[actualNodeIndex] =
+                                                    0.9;
+                                              });
+                                            },
+                                            onTapUp: (_) async {
+                                              setState(() {
+                                                nodeScales[actualNodeIndex] =
+                                                    1.0;
+                                              });
 
-          await chestController.openMysteryChest(
-            topic: currentTopic,
-            nodeIndex: actualNodeIndex,
-            nodeStatus: nodeStatus,
-            baseNodeIndex: baseNodeIndex,
-            updateNodeStatus: (int nodeIndex) {
-              setState(() {
-                nodeStatus[nodeIndex] = 2;
-              });
-              _saveNodeStatus();
-            },
-          );
-        },
-        child: AnimatedScale(
-          scale: nodeScales[actualNodeIndex],
-          duration: const Duration(milliseconds: 200),
-          child: Image.asset(
-            nodeStatus[actualNodeIndex] == 2
-                ? 'assets/icons/chest_open.png'
-                : 'assets/icons/chest.png',
-            width: 80,
-            height: 80,
-          ),
-        ),
-      )
-                                            : Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                GestureDetector(
-                                                  onTapDown:
-                                                      isLocked
-                                                          ? null
-                                                          : (_) {
-                                                            setState(() {
-                                                              nodeScales[actualNodeIndex] =
-                                                                  0.9;
-                                                            });
-                                                          },
-                                                  onTapUp:
-                                                      isLocked
-                                                          ? null
-                                                          : (_) {
-                                                            setState(() {
-                                                              nodeScales[actualNodeIndex] =
-                                                                  1.0;
-                                                            });
-                                                            SoundManager.playButtonSound();
-                                                            _navigateToExercise(
-                                                              currentTopic,
-                                                              nodeInTopic,
-                                                              actualNodeIndex,
-                                                            );
-                                                          },
-                                                  child: AnimatedScale(
-                                                    scale:
-                                                        nodeScales[actualNodeIndex],
-                                                    duration: const Duration(
-                                                      milliseconds: 200,
+                                              await chestController
+                                                  .openMysteryChest(
+                                                    topic: currentTopic,
+                                                    nodeIndex: actualNodeIndex,
+                                                    nodeStatus: nodeStatus,
+                                                    baseNodeIndex:
+                                                        baseNodeIndex,
+                                                    updateNodeStatus: (
+                                                      int nodeIndex,
+                                                    ) {
+                                                      setState(() {
+                                                        nodeStatus[nodeIndex] =
+                                                            2;
+                                                      });
+                                                      _saveNodeStatus();
+                                                    },
+                                                  );
+                                            },
+                                            child: AnimatedScale(
+                                              scale:
+                                                  nodeScales[actualNodeIndex],
+                                              duration: const Duration(
+                                                milliseconds: 200,
+                                              ),
+                                              child: Image.asset(
+                                                nodeStatus[actualNodeIndex] == 2
+                                                    ? 'assets/icons/chest_open.png'
+                                                    : 'assets/icons/chest.png',
+                                                width: 80,
+                                                height: 80,
+                                              ),
+                                            ),
+                                          )
+                                          : Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              GestureDetector(
+                                                onTapDown:
+                                                    isLocked
+                                                        ? null
+                                                        : (_) {
+                                                          setState(() {
+                                                            nodeScales[actualNodeIndex] =
+                                                                0.9;
+                                                          });
+                                                        },
+                                                onTapUp:
+                                                    isLocked
+                                                        ? null
+                                                        : (_) {
+                                                          setState(() {
+                                                            nodeScales[actualNodeIndex] =
+                                                                1.0;
+                                                          });
+                                                          SoundManager.playButtonSound();
+                                                          _navigateToExercise(
+                                                            currentTopic,
+                                                            nodeInTopic,
+                                                            actualNodeIndex,
+                                                          );
+                                                        },
+                                                child: AnimatedScale(
+                                                  scale:
+                                                      nodeScales[actualNodeIndex],
+                                                  duration: const Duration(
+                                                    milliseconds: 200,
+                                                  ),
+                                                  child: Image.asset(
+                                                    getNodeIcon(
+                                                      nodeStatus[actualNodeIndex],
                                                     ),
-                                                    child: Image.asset(
-                                                      getNodeIcon(
-                                                        nodeStatus[actualNodeIndex],
-                                                      ),
-                                                      width: 60,
-                                                      height: 60,
-                                                      color:
-                                                          isLocked
-                                                              ? Colors.grey
-                                                                  .withOpacity(
-                                                                    0.5,
-                                                                  )
-                                                              : null,
-                                                      colorBlendMode:
-                                                          isLocked
-                                                              ? BlendMode.modulate
-                                                              : null,
-                                                    ),
+                                                    width: 60,
+                                                    height: 60,
+                                                    color:
+                                                        isLocked
+                                                            ? Colors.grey
+                                                                .withOpacity(
+                                                                  0.5,
+                                                                )
+                                                            : null,
+                                                    colorBlendMode:
+                                                        isLocked
+                                                            ? BlendMode.modulate
+                                                            : null,
                                                   ),
                                                 ),
-                                                if (isLocked)
-                                                  Icon(
-                                                    Icons.lock,
-                                                    size: 30,
-                                                    color: Colors.black
-                                                        .withOpacity(0.7),
-                                                  ),
-                                              ],
-                                            ),
-                                  ),
+                                              ),
+                                              if (isLocked)
+                                                Icon(
+                                                  Icons.lock,
+                                                  size: 30,
+                                                  color: Colors.black
+                                                      .withOpacity(0.7),
+                                                ),
+                                            ],
+                                          ),
                                 ),
-                              );
-                            }),
-                          ),
+                              ),
+                            );
+                          }),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
+              ),
+            );
+          },
+        );
   }
 }

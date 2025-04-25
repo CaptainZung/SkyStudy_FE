@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../global_widgets/appbar.dart'; // Import CustomAppBar
+import '../global_widgets/appbar.dart';
 import 'leaderboard_controller.dart';
+import 'package:skystudy/app/modules/profile/profile_controller.dart'; // Import ProfileController
 
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
@@ -14,11 +15,14 @@ class LeaderboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Khởi tạo ProfileController để lấy rank
+    final ProfileController profileController = Get.find<ProfileController>();
+
     return GetBuilder<LeaderboardController>(
       init: LeaderboardController(),
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F9FC), // Màu nền sáng hơn
+          backgroundColor: const Color(0xFFF5F9FC),
           appBar: CustomAppBar(
             title: 'Bảng Xếp Hạng',
             backgroundColor: const Color(0xFF2277B4),
@@ -54,10 +58,6 @@ class LeaderboardPage extends StatelessWidget {
                 }
 
                 final currentUser = snapshot.data!;
-                int userPosition = controller.getUserPosition(currentUser);
-                if (userPosition == 0) {
-                  userPosition = -1; // Ensure it shows 'Chưa có xếp hạng' if not found
-                }
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -227,8 +227,7 @@ class LeaderboardPage extends StatelessWidget {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor:
-                                  const Color(0xFF8FEFFF).withOpacity(0.3),
+                              backgroundColor: const Color(0xFF8FEFFF).withOpacity(0.3),
                               radius: 22,
                               child: Text(
                                 currentUser.length % 2 == 0 ? '👧' : '👦',
@@ -249,8 +248,8 @@ class LeaderboardPage extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    userPosition >= 0
-                                        ? 'Hạng ${userPosition + 1}'
+                                    profileController.rank.value > 0
+                                        ? 'Hạng ${profileController.rank.value}'
                                         : 'Chưa có xếp hạng',
                                     style: const TextStyle(
                                         color: Colors.black54, fontSize: 11),
@@ -258,7 +257,7 @@ class LeaderboardPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            if (userPosition != -1)
+                            if (profileController.rank.value > 0)
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -269,7 +268,7 @@ class LeaderboardPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Text(
-                                  '#${userPosition + 1}',
+                                  '#${profileController.rank.value}',
                                   style: const TextStyle(
                                     color: Colors.black87,
                                     fontWeight: FontWeight.w600,

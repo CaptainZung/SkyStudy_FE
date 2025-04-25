@@ -16,7 +16,7 @@ class RealtimeController extends GetxController {
   final threshold = 0.5;
   final double iou = 0.5;
   final int inputSize = 640;
-
+ 
   final List<Color> boundingBoxesColorList = [
     Colors.lightBlueAccent,
     Colors.red,
@@ -37,7 +37,7 @@ class RealtimeController extends GetxController {
     Colors.lightBlue,
     Colors.black,
   ];
-
+ 
   late final List<Color> randomBoundingBoxColors;
  
   ObjectDetector? predictor;
@@ -49,7 +49,7 @@ class RealtimeController extends GetxController {
     // Khởi tạo danh sách màu ngẫu nhiên
     _initRandomColors();
   }
-
+ 
   void _initRandomColors() {
     final random = Random();
     randomBoundingBoxColors = List.generate(
@@ -57,13 +57,13 @@ class RealtimeController extends GetxController {
       (index) => boundingBoxesColorList[random.nextInt(boundingBoxesColorList.length)],
     );
   }
-
+ 
   Future<void> init() async {
     if (isReady.value) return; // tránh init lại nhiều lần
  
     final permissionGranted = await _checkPermissions();
     if (!permissionGranted) {
-      logger.e('❌ Permissions not granted.');
+      logger.e('Permissions not granted.');
       return;
     }
  
@@ -82,10 +82,10 @@ class RealtimeController extends GetxController {
       predictor = ObjectDetector(model: model);
       await predictor!.loadModel(useGpu: true);
  
-      logger.i('✅ Model loaded successfully');
+      logger.i('Model loaded successfully');
       isReady.value = true;
     } catch (e) {
-      logger.e('❌ Error during model loading: $e');
+      logger.e('Error during model loading: $e');
     }
   }
  
