@@ -23,6 +23,8 @@ class AchievementsController extends GetxController {
     _logger.d('AchievementsController được khởi tạo');
   }
 
+  get completedAchievements => null;
+
   @override
   void onInit() {
     _logger.d('onInit của AchievementsController được gọi');
