@@ -38,6 +38,7 @@ dependencies:
   just_audio: ^0.10.0
   flutter_slidable: ^4.0.0
   yaml: ^3.1.2
+  flutter_dotenv: ^ 5.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,6 +54,7 @@ flutter:
   # Khai báo assets
   # Chỉ cần khai báo thư mục gốc, các thư mục con sẽ tự động được bao gồm
   assets:
+    - .env
     - assets/
     - assets/avatar/
     - assets/images/

@@ -4,6 +4,9 @@ import 'package:skystudy/app/utils/auth_manager.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:skystudy/app/api/api_config.dart';
 import '../home/home_controller.dart';
 
 class SettingController extends GetxController {
@@ -12,7 +15,7 @@ class SettingController extends GetxController {
   final RxDouble buttonVolume = SoundManager.buttonVolume.obs;
 
   // Biến để quản lý tên và ảnh
-  final RxString userName = 'Dũng'.obs; // Tên mặc định
+  final RxString userName = ''.obs; // Tên lấy từ API
   final RxString avatarPath = ''.obs; // Đường dẫn ảnh
   final RxBool isEditingName = false.obs; // Trạng thái chỉnh sửa tên
   final TextEditingController nameController = TextEditingController();
@@ -22,6 +25,7 @@ class SettingController extends GetxController {
     super.onInit();
     checkGuestStatus();
     loadUserData();
+    fetchUserNameFromApi(); // Lấy tên từ API
     nameController.text = userName.value;
   }
 
@@ -37,15 +41,46 @@ class SettingController extends GetxController {
     avatarPath.value = prefs.getString('avatar_path') ?? '';
   }
 
+  // Lấy tên người dùng từ API /profile
+  Future<void> fetchUserNameFromApi() async {
+    try {
+      final token = await AuthManager.getToken();
+      if (token == null || token.isEmpty) {
+        Get.snackbar('Lỗi', 'Thiếu token. Vui lòng đăng nhập lại.');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/profile'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['user'];
+        userName.value = data['username'] ?? '';
+        // Lưu vào SharedPreferences để đồng bộ
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_name', userName.value);
+        nameController.text = userName.value;
+      } else {
+        Get.snackbar('Lỗi', 'Không thể lấy thông tin người dùng: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Lỗi', 'Lỗi khi lấy thông tin người dùng: $e');
+    }
+  }
+
   // Lưu tên vào SharedPreferences
   Future<void> saveUserName() async {
     if (nameController.text.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_name', nameController.text);
       userName.value = nameController.text;
-
     }
   }
+
   // Chọn ảnh từ thư viện
   Future<void> pickImage() async {
     try {

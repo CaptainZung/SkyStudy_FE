@@ -5,7 +5,7 @@ import 'package:skystudy/app/controllers/lottie_controller.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => HomeController());
-    Get.lazyPut(() => LottieController());
+Get.put(HomeController(), permanent: true); // Giữ controller mãi mãi
+    Get.put(LottieController(), permanent: true);
   }
 }
