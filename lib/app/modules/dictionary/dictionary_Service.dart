@@ -11,7 +11,6 @@ class DictionaryApi {
   Future<Map<String, List<Dictionary>>> getTopWordsByTopic() async {
     try {
       final url = Uri.parse('$baseUrl/getDictionary');
-
       final response = await http.get(url);
 
       if (response.statusCode == 200) {

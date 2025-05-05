@@ -2,10 +2,13 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:skystudy/app/modules/achievements/achievements_service.dart';
 import 'package:skystudy/app/modules/achievements/achivement_model.dart';
+import 'package:skystudy/app/modules/achievements/sticker/sticker_model.dart';
 
 class AchievementsController extends GetxController {
   final AchievementApi _achievementApi = AchievementApi();
   List<Achievement> achievements = [];
+  List<Sticker> stickers = <Sticker>[].obs;
+  RxBool isLoadingStickers = true.obs;
 
   // Khởi tạo logger
   final Logger _logger = Logger(
@@ -30,13 +33,12 @@ class AchievementsController extends GetxController {
     _logger.d('onInit của AchievementsController được gọi');
     super.onInit();
     fetchAchievements();
+    fetchStickers();
   }
 
   Future<void> fetchAchievements() async {
     try {
-      _logger.i('Bắt đầu lấy danh sách thành tựu');
       achievements = await _achievementApi.getAchievements();
-      _logger.i('Lấy danh sách thành tựu thành công: ${achievements.length} thành tựu');
       update();
     } catch (e) {
       _logger.e('Lỗi khi lấy danh sách thành tựu: $e');
@@ -68,5 +70,19 @@ class AchievementsController extends GetxController {
       _logger.e('Lỗi khi nhận thưởng thành tựu $achievementId: $e');
       Get.snackbar('Lỗi', 'Không thể nhận thưởng: $e');
     }
+  }
+
+
+  Future<void> fetchStickers() async {
+      final stickerList = await _achievementApi.getUserStickers();
+      isLoadingStickers(false);
+      if (stickerList.isEmpty) {
+        Get.snackbar('Thông báo', 'Danh sách sticker rỗng. Hãy hoàn thành nhiệm vụ để nhận sticker!');
+      }
+      stickers.assignAll(stickerList);
+    if (stickerList.isEmpty) {
+        Get.snackbar('Thông báo', 'Danh sách sticker rỗng. Hãy hoàn thành nhiệm vụ để nhận sticker!');
+    }
+    isLoadingStickers(false);
   }
 }
