@@ -42,10 +42,7 @@ class LeaderboardPage extends StatelessWidget {
               return const Center(
                 child: Text(
                   'Không có dữ liệu bảng xếp hạng',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
               );
             }
@@ -60,7 +57,10 @@ class LeaderboardPage extends StatelessWidget {
                 final currentUser = snapshot.data!;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
+                  ),
                   child: Column(
                     children: [
                       // Top 3 Leaderboard UI
@@ -72,7 +72,7 @@ class LeaderboardPage extends StatelessWidget {
                             if (controller.leaderboardData.length > 1)
                               _buildTopPlayerCard(
                                 rank: 2,
-                                color: Colors.grey[100],
+                                color: const Color.fromARGB(255, 227, 218, 218),
                                 textColor: Colors.black54,
                                 player: controller.leaderboardData[1],
                                 avatarRadius: 28,
@@ -89,7 +89,7 @@ class LeaderboardPage extends StatelessWidget {
                             if (controller.leaderboardData.length > 2)
                               _buildTopPlayerCard(
                                 rank: 3,
-                                color: Colors.brown[100],
+                                color: const Color.fromARGB(255, 247, 159, 127),
                                 textColor: Colors.brown[400],
                                 player: controller.leaderboardData[2],
                                 avatarRadius: 28,
@@ -118,7 +118,8 @@ class LeaderboardPage extends StatelessWidget {
                             child: ListView.builder(
                               itemCount: controller.leaderboardData.length,
                               itemBuilder: (context, index) {
-                                final player = controller.leaderboardData[index];
+                                final player =
+                                    controller.leaderboardData[index];
                                 return AnimatedOpacity(
                                   opacity: 1.0,
                                   duration: const Duration(milliseconds: 500),
@@ -128,14 +129,17 @@ class LeaderboardPage extends StatelessWidget {
                                       horizontal: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF8FEFFF).withOpacity(0.1),
+                                      color: const Color(
+                                        0xFF8FEFFF,
+                                      ).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 6,
-                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 6,
+                                          ),
                                       leading: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -149,11 +153,12 @@ class LeaderboardPage extends StatelessWidget {
                                           ),
                                           const SizedBox(width: 8),
                                           CircleAvatar(
-                                            backgroundColor: const Color(0xFF8FEFFF).withOpacity(0.3),
+                                            backgroundColor: const Color(
+                                              0xFF8FEFFF,
+                                            ).withOpacity(0.3),
                                             radius: 22,
-                                            child: Text(
-                                              player['avatar'],
-                                              style: const TextStyle(fontSize: 20),
+                                            backgroundImage: AssetImage(
+                                              'assets/avatar/${player['avatar']}.png', // Display avatar from assets
                                             ),
                                           ),
                                         ],
@@ -171,15 +176,18 @@ class LeaderboardPage extends StatelessWidget {
                                         child: LinearProgressIndicator(
                                           value: player['progress'],
                                           backgroundColor: Colors.grey[200],
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            _getProgressColor(index),
-                                          ),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                _getProgressColor(index),
+                                              ),
                                           minHeight: 5,
                                         ),
                                       ),
                                       trailing: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
                                           Text(
                                             '${player['score']} điểm',
@@ -189,12 +197,18 @@ class LeaderboardPage extends StatelessWidget {
                                               fontSize: 13,
                                             ),
                                           ),
-                                          if (player['badge'].toString().isNotEmpty)
+                                          if (player['badge']
+                                              .toString()
+                                              .isNotEmpty)
                                             Padding(
-                                              padding: const EdgeInsets.only(top: 2),
+                                              padding: const EdgeInsets.only(
+                                                top: 2,
+                                              ),
                                               child: Text(
                                                 player['badge'],
-                                                style: const TextStyle(fontSize: 12),
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                ),
                                               ),
                                             ),
                                         ],
@@ -227,11 +241,12 @@ class LeaderboardPage extends StatelessWidget {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: const Color(0xFF8FEFFF).withOpacity(0.3),
+                              backgroundColor: const Color(
+                                0xFF8FEFFF,
+                              ).withOpacity(0.3),
                               radius: 22,
-                              child: Text(
-                                currentUser.length % 2 == 0 ? '👧' : '👦',
-                                style: const TextStyle(fontSize: 20),
+                              backgroundImage: AssetImage(
+                                'assets/avatar/${profileController.avatarName.value}.png', // Lấy avatar từ ProfileController
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -252,7 +267,9 @@ class LeaderboardPage extends StatelessWidget {
                                         ? 'Hạng ${profileController.rank.value}'
                                         : 'Chưa có xếp hạng',
                                     style: const TextStyle(
-                                        color: Colors.black54, fontSize: 11),
+                                      color: Colors.black54,
+                                      fontSize: 11,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -328,22 +345,8 @@ class LeaderboardPage extends StatelessWidget {
           CircleAvatar(
             radius: avatarRadius,
             backgroundColor: Colors.white,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  player['avatar'],
-                  style: TextStyle(fontSize: avatarRadius - 2),
-                ),
-                if (isCrowned)
-                  const Positioned(
-                    top: -18,
-                    child: Text(
-                      '👑',
-                      style: TextStyle(fontSize: 22),
-                    ),
-                  ),
-              ],
+            backgroundImage: AssetImage(
+              'assets/avatar/${player['avatar']}.png', // Display avatar from assets
             ),
           ),
           const SizedBox(height: 6),

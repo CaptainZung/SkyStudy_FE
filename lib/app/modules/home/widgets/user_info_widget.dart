@@ -11,6 +11,19 @@ class UserInfoWidget extends StatelessWidget {
     final SettingController settingController = Get.find<SettingController>();
     final ProfileController profileController = Get.find<ProfileController>();
 
+    void _updateAvatarOnServer(String avatarName) async {
+      try {
+        final response = await profileController.updateAvatar(avatarName); // Gửi tên avatar lên server
+        if (response) {
+          profileController.fetchProfileData(); // Đổi từ fetchProfile thành fetchProfileData
+        } else {
+          Get.snackbar('Error', 'Failed to update avatar');
+        }
+      } catch (e) {
+        Get.snackbar('Error', 'An error occurred while updating avatar');
+      }
+    }
+
     void _showAvatarSelectionPopup(BuildContext context) {
       showDialog(
         context: context,
@@ -32,16 +45,16 @@ class UserInfoWidget extends StatelessWidget {
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  itemCount: 20,
+                  itemCount: 28, // Số lượng avatar trong thư mục local
                   itemBuilder: (context, index) {
-                    final avatarPath = 'assets/avatar/avatar_$index.png';
+                    final avatarName = 'avatar_$index'; // Chỉ lấy tên avatar
                     return GestureDetector(
                       onTap: () {
-                        settingController.avatarPath.value = avatarPath;
+                        _updateAvatarOnServer(avatarName); // Gửi tên avatar lên server
                         Navigator.of(context).pop();
                       },
                       child: Image.asset(
-                        avatarPath,
+                        'assets/avatar/$avatarName.png', // Hiển thị ảnh từ local
                         fit: BoxFit.cover,
                       ),
                     );
@@ -115,9 +128,9 @@ class UserInfoWidget extends StatelessWidget {
                 ],
               ),
               child: ClipOval(
-                child: settingController.avatarPath.value.isNotEmpty
-                    ? Image.asset(
-                        settingController.avatarPath.value,
+                child: profileController.avatarName.value.isNotEmpty
+                    ? Image.asset( // Hiển thị avatar từ local assets
+                        'assets/avatar/${profileController.avatarName.value}.png',
                         fit: BoxFit.cover,
                         width: 60,
                         height: 60,

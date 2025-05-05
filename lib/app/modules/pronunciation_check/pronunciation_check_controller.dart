@@ -199,7 +199,7 @@ class PronunciationCheckController extends GetxController {
       String wordToSave = sampleSentence.replaceAll(RegExp(r'[^\w\s]'), '').trim();
 
       // Gọi hàm fetchUserProgress từ service
-      final message = await _service.SaveWord(wordToSave);
+      //final message = await _service.SaveWord(wordToSave);
       Get.snackbar('Thành công', 'Đã lưu từ: $wordToSave');
 
       // Hiển thị thông báo thành công

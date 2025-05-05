@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import '../../routes/app_pages.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -7,25 +8,31 @@ class CustomBottomNavBar extends StatelessWidget {
   const CustomBottomNavBar({super.key, required this.currentIndex});
 
   void _onItemTapped(int index) {
+    final Logger logger = Logger();
     if (index == currentIndex) return;
-
+    logger.i('Navigating to index $index from $currentIndex');
     Future.delayed(const Duration(milliseconds: 100), () {
-      switch (index) {
-        case 0:
-          Get.offNamed(Routes.home);
-          break;
-        case 1:
-          Get.offNamed(Routes.dictionary);
-          break;
-        case 2:
-          Get.offNamed(Routes.detection);
-          break;
-        case 3:
-          Get.offNamed(Routes.achievements);
-          break;
-        case 4:
-          Get.offNamed(Routes.topic);
-          break;
+      if (index == 0 && Get.currentRoute != Routes.home) {
+        Get.back();
+        logger.i('Back to Home');
+      } else {
+        switch (index) {
+          case 0:
+            Get.toNamed(Routes.home);
+            break;
+          case 1:
+            Get.toNamed(Routes.dictionary);
+            break;
+          case 2:
+            Get.toNamed(Routes.detection);
+            break;
+          case 3:
+            Get.toNamed(Routes.achievements);
+            break;
+          case 4:
+            Get.toNamed(Routes.topic);
+            break;
+        }
       }
     });
   }
@@ -34,20 +41,13 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        // Replaced background color with a light gradient
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF0F8FF), // Light color (AliceBlue)
-            Colors.white,
-          ],
+          colors: [Color(0xFFF0F8FF), Colors.white],
         ),
         border: const Border(
-          top: BorderSide(
-            color: Color.fromARGB(255, 0, 187, 255),
-            width: 1.0,
-          ),
+          top: BorderSide(color: Color.fromARGB(255, 0, 187, 255), width: 1.0),
         ),
         boxShadow: const [
           BoxShadow(

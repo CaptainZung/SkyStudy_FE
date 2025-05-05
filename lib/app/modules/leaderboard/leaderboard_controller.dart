@@ -30,7 +30,7 @@ class LeaderboardController extends GetxController {
           return {
             'name': user['username'],
             'score': user['point'],
-            'avatar': _getAvatar(user['username']),
+            'avatar': user['avatar'] ?? 'default_avatar', // Use avatar from API
             'badge': _getBadge(index),
             'progress': _calculateProgress(user['point']),
           };
@@ -46,10 +46,6 @@ class LeaderboardController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  String _getAvatar(String username) {
-    return username.length % 2 == 0 ? '👧' : '👦';
   }
 
   String _getBadge(int index) {
