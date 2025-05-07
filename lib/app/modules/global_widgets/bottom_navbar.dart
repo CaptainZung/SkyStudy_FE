@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:skystudy/app/utils/sound_manager.dart';
 import '../../routes/app_pages.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -12,27 +13,22 @@ class CustomBottomNavBar extends StatelessWidget {
     if (index == currentIndex) return;
     logger.i('Navigating to index $index from $currentIndex');
     Future.delayed(const Duration(milliseconds: 100), () {
-      if (index == 0 && Get.currentRoute != Routes.home) {
-        Get.back();
-        logger.i('Back to Home');
-      } else {
-        switch (index) {
-          case 0:
-            Get.toNamed(Routes.home);
-            break;
-          case 1:
-            Get.toNamed(Routes.dictionary);
-            break;
-          case 2:
-            Get.toNamed(Routes.detection);
-            break;
-          case 3:
-            Get.toNamed(Routes.achievements);
-            break;
-          case 4:
-            Get.toNamed(Routes.topic);
-            break;
-        }
+      switch (index) {
+        case 0:
+          Get.toNamed(Routes.home); // Sử dụng Get.toNamed để giữ trạng thái
+          break;
+        case 1:
+          Get.toNamed(Routes.dictionary);
+          break;
+        case 2:
+          Get.toNamed(Routes.detection);
+          break;
+        case 3:
+          Get.toNamed(Routes.achievements);
+          break;
+        case 4:
+          Get.toNamed(Routes.topic);
+          break;
       }
     });
   }
@@ -59,7 +55,10 @@ class CustomBottomNavBar extends StatelessWidget {
       ),
       child: _CustomNavBar(
         currentIndex: currentIndex,
-        onTap: _onItemTapped,
+        onTap: (index) {
+          SoundManager.playButtonSound();
+          _onItemTapped(index);
+        },
       ),
     );
   }
@@ -91,7 +90,10 @@ class _CustomNavBar extends StatelessWidget {
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => onTap(index),
+              onTap: () {
+                SoundManager.playButtonSound();
+                onTap(index);
+              },
               borderRadius: BorderRadius.circular(10),
               child: Container(
                 padding: const EdgeInsets.all(8.0),

@@ -61,16 +61,19 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
       isLoading = true;
     });
 
+    final prefs = await SharedPreferences.getInstance();
     final controller = Get.find<HomeController>();
-    await controller.loadProgressFromAPI();
 
-    final currentTopic = controller.currentTopic.value;
-    final currentNode = controller.currentNode.value;
-
-    setState(() {
-      // Tải trước toàn bộ danh sách topic
-      loadedTopics = topics;
-      currentTopicIndex = topics.indexOf(currentTopic);
+    // Load trạng thái từ SharedPreferences
+    currentTopicIndex = prefs.getInt('currentTopicIndex') ?? 0;
+    final savedNodeStatus = prefs.getStringList('nodeStatus');
+    if (savedNodeStatus != null) {
+      nodeStatus = savedNodeStatus.map((e) => int.parse(e)).toList();
+    } else {
+      // Nếu không có trạng thái lưu trữ, tải từ API
+      await controller.loadProgressFromAPI();
+      final currentTopic = controller.currentTopic.value;
+      final currentNode = controller.currentNode.value;
 
       // Cập nhật trạng thái node
       nodeStatus = List.generate(40, (index) {
@@ -87,7 +90,10 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
           return 0; // Chưa mở khóa
         }
       });
+    }
 
+    setState(() {
+      loadedTopics = topics;
       isLoading = false;
     });
 
@@ -102,6 +108,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
 
   Future<void> _saveNodeStatus() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('currentTopicIndex', currentTopicIndex);
     await prefs.setStringList(
       'nodeStatus',
       nodeStatus.map((e) => e.toString()).toList(),
@@ -133,17 +140,18 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     int nodeInTopic,
     int actualNodeIndex,
   ) {
-    SoundManager.pauseMusic(); // Tạm dừng nhạc khi vào bài tập
+    SoundManager.stopMusic(); // Tạm dừng nhạc khi vào bài tập
     Get.toNamed(
       Routes.exercise1,
       arguments: {'topic': currentTopic, 'node': nodeInTopic + 1},
-    )?.then((result) {
+    )?.then((result) async {
       logger.i(
         'Result from exercise1 (Node $actualNodeIndex, Topic $currentTopic): $result',
       );
       if (result == true) {
         completeNode(actualNodeIndex);
       }
+      await _saveNodeStatus(); // Lưu trạng thái sau khi hoàn thành bài tập
       SoundManager.playMusic(); // Phát lại nhạc khi quay lại
     });
   }
@@ -156,11 +164,11 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
           controller: _pageController,
           scrollDirection: Axis.vertical,
           reverse: true,
-          onPageChanged: (index) {
+          onPageChanged: (index) async {
             setState(() {
               currentTopicIndex = index;
             });
-
+            await _saveNodeStatus(); // Lưu trạng thái khi thay đổi topic
             widget.onTopicChanged(currentTopicIndex);
           },
           itemCount: loadedTopics.length,

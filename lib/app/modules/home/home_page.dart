@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
+import 'package:skystudy/app/modules/home/home_controller.dart';
 import 'package:skystudy/app/modules/home/widgets/user_info_widget.dart';
 import 'package:skystudy/app/modules/home/widgets/lottie_animation_widget.dart';
 import 'package:skystudy/app/modules/home/widgets/action_buttons_widget.dart';
@@ -28,6 +29,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    final homeController = Get.put(HomeController());
+    homeController.loadCurrentState(); // Load saved state on initialization
     Get.put(SettingController());
     Get.put(ProfileController());
     SoundManager.playMusic();
@@ -63,17 +66,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
+  void _handleUserInteraction() {
+    SoundManager.playButtonSound();
+    _onUserInteraction();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomNavHeight = 60.0;
 
     return GestureDetector(
-      onTap: _onUserInteraction,
-      onPanDown: (_) => _onUserInteraction(),
-      onPanUpdate: (_) => _onUserInteraction(),
-      onPanEnd: (_) => _onUserInteraction(),
-      onDoubleTap: _onUserInteraction,
-      onLongPress: _onUserInteraction,
+      onTap: _handleUserInteraction,
+      onPanDown: (_) => _handleUserInteraction(),
+      onPanUpdate: (_) => _handleUserInteraction(),
+      onPanEnd: (_) => _handleUserInteraction(),
+      onDoubleTap: _handleUserInteraction,
+      onLongPress: _handleUserInteraction,
       behavior: HitTestBehavior.opaque,
       child: Scaffold(
         body: SafeArea(

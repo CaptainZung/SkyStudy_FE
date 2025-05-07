@@ -89,7 +89,7 @@ class LeaderboardPage extends StatelessWidget {
                             if (controller.leaderboardData.length > 2)
                               _buildTopPlayerCard(
                                 rank: 3,
-                                color: const Color.fromARGB(255, 247, 159, 127),
+                                color: const Color.fromARGB(255, 243, 154, 122),
                                 textColor: Colors.brown[400],
                                 player: controller.leaderboardData[2],
                                 avatarRadius: 28,

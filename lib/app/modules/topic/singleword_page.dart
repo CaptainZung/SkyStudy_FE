@@ -19,6 +19,9 @@ class SingleWordPage extends StatelessWidget {
         title: 'TỪ VỰNG',
         backgroundColor: Colors.blue,
         showBackButton: true,
+        onBack: () {
+          Get.back(); // Trở về trang trước đó
+        },
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -49,7 +52,7 @@ class SingleWordPage extends StatelessWidget {
                     if (word['ipa'] != null)
                       Row(
                         children: [
-                          const Icon(Icons.volume_up, color: Colors.white70, size: 20),
+                          //const Icon(Icons.volume_up, color: Colors.white70, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             word['ipa'] ?? '',

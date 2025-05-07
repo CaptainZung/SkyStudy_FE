@@ -84,7 +84,7 @@ class _AnimatedSettingDialogState extends State<_AnimatedSettingDialog> with Sin
                     ),
                     child: const Center(
                       child: Text(
-                        'Setting',
+                        'Cài Đặt',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -206,9 +206,11 @@ class _AnimatedSettingDialogState extends State<_AnimatedSettingDialog> with Sin
                   )),
               const SizedBox(height: 20),
               _buildVolumeSlider('Âm Lượng', widget.controller.musicVolume, (newVolume) {
+                SoundManager.playButtonSound();
                 widget.controller.updateMusicVolume(newVolume);
               }),
               _buildVolumeSlider('Hiệu Ứng', widget.controller.buttonVolume, (newVolume) {
+                SoundManager.playButtonSound();
                 widget.controller.updateButtonVolume(newVolume);
               }),
               const SizedBox(height: 20),
@@ -313,9 +315,9 @@ class _AnimatedSettingDialogState extends State<_AnimatedSettingDialog> with Sin
               children: [
                 IconButton(
                   onPressed: () {
+                    SoundManager.playButtonSound();
                     double newVolume = (volume.value - 0.2).clamp(0.0, 1.0);
                     onChanged(newVolume);
-                    SoundManager.playButtonSound();
                   },
                   icon: const Icon(Icons.remove_circle_outline, size: 24, color: Color(0xFF2277B4)),
                   padding: EdgeInsets.zero,
@@ -338,9 +340,9 @@ class _AnimatedSettingDialogState extends State<_AnimatedSettingDialog> with Sin
                     )),
                 IconButton(
                   onPressed: () {
+                    SoundManager.playButtonSound();
                     double newVolume = (volume.value + 0.20).clamp(0.0, 1.0);
                     onChanged(newVolume);
-                    SoundManager.playButtonSound();
                   },
                   icon: const Icon(Icons.add_circle_outline, size: 24, color: Color(0xFF2277B4)),
                   padding: EdgeInsets.zero,

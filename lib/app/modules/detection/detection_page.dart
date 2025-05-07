@@ -7,12 +7,14 @@ import 'package:skystudy/app/modules/global_widgets/bottom_navbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lottie/lottie.dart';
 import 'package:logger/logger.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class DetectionPage extends StatelessWidget {
   const DetectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AudioPlayer audioPlayer = AudioPlayer(); // Initialize AudioPlayer
     return GetBuilder<DetectionController>(
       init: DetectionController(),
       builder: (controller) {
@@ -167,8 +169,9 @@ class DetectionPage extends StatelessWidget {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           print('Nhấn nút captureAndPredict');
+                          await audioPlayer.play(AssetSource('audio/shot.mp3')); // Play sound
                           controller.captureAndPredict();
                         },
                         child: AnimatedScale(

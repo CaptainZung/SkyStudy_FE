@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:skystudy/app/controllers/lottie_controller.dart';
 
 class LottieAnimationWidget extends StatefulWidget {
-  const LottieAnimationWidget({super.key}); // Xóa tham số isIdle
+  const LottieAnimationWidget({super.key}); // Ensure the key is unique if passed
 
   @override
   LottieAnimationWidgetState createState() => LottieAnimationWidgetState();
@@ -23,6 +23,8 @@ class LottieAnimationWidgetState extends State<LottieAnimationWidget> with Ticke
 
   @override
   void dispose() {
+    lottieController.ufoController?.dispose(); // Dispose ufoController
+    lottieController.dinoController?.dispose(); // Dispose dinoController
     lottieController.stopAnimations();
     lottieController.onClose();
     super.dispose();
@@ -31,9 +33,10 @@ class LottieAnimationWidgetState extends State<LottieAnimationWidget> with Ticke
   @override
   Widget build(BuildContext context) {
     return Stack(
+      key: UniqueKey(), // Ensure the widget tree is rebuilt properly
       children: [
         Positioned(
-          top: MediaQuery.of(context).size.height * 0.60,
+          top: MediaQuery.of(context).size.height * 0.67,
           left: MediaQuery.of(context).size.width * 0.45,
           child: Lottie.asset(
             'assets/lottie/ufo1.json',
@@ -53,7 +56,7 @@ class LottieAnimationWidgetState extends State<LottieAnimationWidget> with Ticke
           ),
         ),
         Positioned(
-          top: MediaQuery.of(context).size.height * 0.55,
+          top: MediaQuery.of(context).size.height * 0.62,
           left: MediaQuery.of(context).size.width * 0.55,
           child: Lottie.asset(
             'assets/lottie/khunglongdance.json',

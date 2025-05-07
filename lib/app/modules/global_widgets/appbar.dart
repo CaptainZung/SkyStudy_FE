@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:skystudy/app/utils/sound_manager.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -24,15 +25,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(
-        title,
-        style: titleStyle ??
-            const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+      title: Padding(
+        padding: const EdgeInsets.only(left: 0), // Loại bỏ khoảng cách mặc định
+        child: Text(
+          title,
+          style: titleStyle ??
+              const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
       ),
+      centerTitle: false, // Đảm bảo tiêu đề không bị căn giữa
+      leadingWidth: showBackButton ? 56 : 0, // Điều chỉnh khoảng cách leading
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: showBackButton
@@ -41,9 +47,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Icons.arrow_back,
                 color: Colors.white,
               ),
-              onPressed: onBack ?? () => Get.back(), // <-- Ưu tiên callback
+              onPressed: () {
+                SoundManager.playButtonSound();
+                if (onBack != null) {
+                  onBack!(); // Gọi callback nếu được cung cấp
+                } else {
+                  Get.back(); // Mặc định quay lại trang trước
+                }
+              },
             )
-          : null,
+          : Container(),
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

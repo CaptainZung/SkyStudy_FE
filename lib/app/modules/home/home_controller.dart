@@ -27,6 +27,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    loadCurrentState(); // Load saved state on initialization
     loadProgressFromAPI(); // Preload all progress data from the API
   }
 
@@ -112,5 +113,17 @@ class HomeController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_topic', topic);
     await prefs.setInt('last_node', node);
+  }
+
+  Future<void> saveCurrentState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('current_topic', currentTopic.value);
+    await prefs.setInt('current_node', currentNode.value);
+  }
+
+  Future<void> loadCurrentState() async {
+    final prefs = await SharedPreferences.getInstance();
+    currentTopic.value = prefs.getString('current_topic') ?? topics[0];
+    currentNode.value = prefs.getInt('current_node') ?? 1;
   }
 }
