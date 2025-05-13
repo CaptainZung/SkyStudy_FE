@@ -106,7 +106,7 @@ class LeaderboardPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withAlpha(13),
                                 spreadRadius: 2,
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
@@ -131,7 +131,7 @@ class LeaderboardPage extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: const Color(
                                         0xFF8FEFFF,
-                                      ).withOpacity(0.1),
+                                      ).withAlpha(13),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: ListTile(
@@ -155,7 +155,7 @@ class LeaderboardPage extends StatelessWidget {
                                           CircleAvatar(
                                             backgroundColor: const Color(
                                               0xFF8FEFFF,
-                                            ).withOpacity(0.3),
+                                            ).withAlpha(13),
                                             radius: 22,
                                             backgroundImage: AssetImage(
                                               'assets/avatar/${player['avatar']}.png', // Display avatar from assets

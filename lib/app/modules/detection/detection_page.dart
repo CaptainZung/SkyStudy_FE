@@ -99,7 +99,6 @@ class DetectionPage extends StatelessWidget {
                 if (controller.isCameraInitialized.value &&
                     controller.cameraController != null &&
                     controller.cameraController!.value.isInitialized) {
-                  print('Hiển thị CameraPreview');
                   return Stack(
                     children: [
                       SizedBox(
@@ -115,7 +114,7 @@ class DetectionPage extends StatelessWidget {
                           height: MediaQuery.of(context).size.height * 0.5,
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withAlpha(128),
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(20),
@@ -125,7 +124,6 @@ class DetectionPage extends StatelessWidget {
                     ],
                   );
                 } else {
-                  print('Hiển thị CircularProgressIndicator');
                   return const Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
@@ -143,7 +141,6 @@ class DetectionPage extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          print('Nhấn nút navigateToRealtime');
                           controller.navigateToRealtime();
                         },
                         child: AnimatedScale(
@@ -154,7 +151,7 @@ class DetectionPage extends StatelessWidget {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withAlpha(128),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -170,7 +167,6 @@ class DetectionPage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () async {
-                          print('Nhấn nút captureAndPredict');
                           await audioPlayer.play(AssetSource('audio/shot.mp3')); // Play sound
                           controller.captureAndPredict();
                         },
@@ -184,7 +180,7 @@ class DetectionPage extends StatelessWidget {
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withAlpha(128),
                                   blurRadius: 10,
                                   offset: const Offset(0, 3),
                                 ),
@@ -200,7 +196,6 @@ class DetectionPage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          print('Nhấn nút switchCamera');
                           controller.switchCamera();
                         },
                         child: AnimatedScale(
@@ -211,7 +206,7 @@ class DetectionPage extends StatelessWidget {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withAlpha(128),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -232,7 +227,6 @@ class DetectionPage extends StatelessWidget {
               // Hiển thị Lottie animation khi đang chụp ảnh và nhận diện
               Obx(() {
                 if (controller.isLoading.value) {
-                  print('Hiển thị Lottie loadingdetection');
                   return Container(
                     color: Colors.black54,
                     child: Center(

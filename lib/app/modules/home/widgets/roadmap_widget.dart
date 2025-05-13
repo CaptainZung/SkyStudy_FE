@@ -6,6 +6,8 @@ import 'package:skystudy/app/modules/home/home_controller.dart';
 import 'package:skystudy/app/modules/home/widgets/chest_controller.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
+import 'package:skystudy/app/utils/auth_manager.dart';
+import 'package:skystudy/app/modules/exercises/exercise_1/exercise_1_page.dart';
 
 class RoadmapWidget extends StatefulWidget {
   final Function(int) onTopicChanged;
@@ -34,7 +36,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
   bool isLoading = true;
   bool isLoadingNext = false;
   int currentTopicIndex = 0;
-  late PageController _pageController;
+  PageController? _pageController;
   late ChestController chestController;
   final Logger logger = Logger();
 
@@ -42,7 +44,6 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
   void initState() {
     super.initState();
     chestController = Get.put(ChestController());
-    _pageController = PageController(initialPage: 0);
     _loadNodeStatus();
     SoundManager.init().then((_) {
       SoundManager.playMusic();
@@ -51,7 +52,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _pageController?.dispose();
     SoundManager.stopMusic();
     super.dispose();
   }
@@ -62,55 +63,115 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     });
 
     final prefs = await SharedPreferences.getInstance();
+    final token = await AuthManager.getToken() ?? '';
     final controller = Get.find<HomeController>();
 
-    // Load trạng thái từ SharedPreferences
-    currentTopicIndex = prefs.getInt('currentTopicIndex') ?? 0;
-    final savedNodeStatus = prefs.getStringList('nodeStatus');
-    if (savedNodeStatus != null) {
+    // 1. Ưu tiên load local để hiển thị ngay lập tức
+    int? localTopicIndex = prefs.getInt('currentTopicIndex_${token}');
+    final savedNodeStatus = prefs.getStringList('nodeStatus_${token}');
+    bool loadedFromLocal = false;
+
+    if (savedNodeStatus != null && localTopicIndex != null) {
       nodeStatus = savedNodeStatus.map((e) => int.parse(e)).toList();
+      currentTopicIndex = localTopicIndex;
+      loadedFromLocal = true;
     } else {
-      // Nếu không có trạng thái lưu trữ, tải từ API
+      // Nếu không có local thì mới lấy từ API/local controller
       await controller.loadProgressFromAPI();
       final currentTopic = controller.currentTopic.value;
       final currentNode = controller.currentNode.value;
 
-      // Cập nhật trạng thái node
+      currentTopicIndex = topics.indexOf(currentTopic);
+      if (currentTopicIndex == -1) currentTopicIndex = 0;
+
       nodeStatus = List.generate(40, (index) {
         int topicIdx = index ~/ 5;
         int nodeInTopic = index % 5 + 1;
-
         if (topicIdx < currentTopicIndex) {
-          return 2; // Hoàn thành
+          return 2;
         } else if (topicIdx == currentTopicIndex) {
-          if (nodeInTopic < currentNode) return 2; // Hoàn thành
-          if (nodeInTopic == currentNode) return 1; // Đang hoạt động
-          return 0; // Chưa mở khóa
+          if (nodeInTopic < currentNode) return 2;
+          if (nodeInTopic == currentNode) return 1;
+          return 0;
         } else {
-          return 0; // Chưa mở khóa
+          return 0;
         }
       });
     }
+
+    // Khởi tạo _pageController với đúng initialPage
+    _pageController?.dispose();
+    _pageController = PageController(initialPage: currentTopicIndex);
 
     setState(() {
       loadedTopics = topics;
       isLoading = false;
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_pageController.hasClients) {
-        _pageController.jumpToPage(currentTopicIndex);
-      }
-    });
-
+    // Không cần jumpToPage nữa vì đã khởi tạo đúng trang
     widget.onTopicChanged(currentTopicIndex);
+
+    // 2. Sau khi đã hiển thị local, đồng bộ lại với server (nếu muốn)
+    // Nếu không muốn đồng bộ lại thì bỏ đoạn dưới đây
+    if (loadedFromLocal) {
+      await controller.loadProgressFromAPI();
+      final currentTopic = controller.currentTopic.value;
+      final currentNode = controller.currentNode.value;
+      int apiTopicIndex = topics.indexOf(currentTopic);
+      if (apiTopicIndex == -1) apiTopicIndex = 0;
+
+      // Nếu dữ liệu server khác local thì mới update lại UI
+      if (apiTopicIndex != currentTopicIndex ||
+          !_isNodeStatusSame(apiTopicIndex, currentNode, nodeStatus)) {
+        setState(() {
+          currentTopicIndex = apiTopicIndex;
+          nodeStatus = List.generate(40, (index) {
+            int topicIdx = index ~/ 5;
+            int nodeInTopic = index % 5 + 1;
+            if (topicIdx < apiTopicIndex) {
+              return 2;
+            } else if (topicIdx == apiTopicIndex) {
+              if (nodeInTopic < currentNode) return 2;
+              if (nodeInTopic == currentNode) return 1;
+              return 0;
+            } else {
+              return 0;
+            }
+          });
+          // Cập nhật lại pageController nếu cần
+          _pageController?.jumpToPage(currentTopicIndex);
+        });
+        widget.onTopicChanged(currentTopicIndex);
+      }
+    }
+  }
+
+  // Helper để so sánh nodeStatus local và server
+  bool _isNodeStatusSame(int topicIndex, int node, List<int> localStatus) {
+    for (int i = 0; i < 40; i++) {
+      int topicIdx = i ~/ 5;
+      int nodeInTopic = i % 5 + 1;
+      int expected;
+      if (topicIdx < topicIndex) {
+        expected = 2;
+      } else if (topicIdx == topicIndex) {
+        if (nodeInTopic < node) expected = 2;
+        else if (nodeInTopic == node) expected = 1;
+        else expected = 0;
+      } else {
+        expected = 0;
+      }
+      if (localStatus[i] != expected) return false;
+    }
+    return true;
   }
 
   Future<void> _saveNodeStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('currentTopicIndex', currentTopicIndex);
+    final token = await AuthManager.getToken() ?? '';
+    await prefs.setInt('currentTopicIndex_${token}', currentTopicIndex);
     await prefs.setStringList(
-      'nodeStatus',
+      'nodeStatus_${token}',
       nodeStatus.map((e) => e.toString()).toList(),
     );
   }
@@ -140,10 +201,11 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     int nodeInTopic,
     int actualNodeIndex,
   ) {
-    SoundManager.stopMusic(); // Tạm dừng nhạc khi vào bài tập
-    Get.toNamed(
-      Routes.exercise1,
+    SoundManager.stopMusic();
+    Get.to(
+      () => Exercise1Page(),
       arguments: {'topic': currentTopic, 'node': nodeInTopic + 1},
+      transition: Transition.rightToLeft, // hoặc Transition.leftToRight nếu muốn
     )?.then((result) async {
       logger.i(
         'Result from exercise1 (Node $actualNodeIndex, Topic $currentTopic): $result',
@@ -151,8 +213,8 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
       if (result == true) {
         completeNode(actualNodeIndex);
       }
-      await _saveNodeStatus(); // Lưu trạng thái sau khi hoàn thành bài tập
-      SoundManager.playMusic(); // Phát lại nhạc khi quay lại
+      await _saveNodeStatus();
+      SoundManager.playMusic();
     });
   }
 
@@ -161,7 +223,7 @@ class RoadmapWidgetState extends State<RoadmapWidget> {
     return isLoading
         ? const Center(child: CircularProgressIndicator())
         : PageView.builder(
-          controller: _pageController,
+          controller: _pageController!,
           scrollDirection: Axis.vertical,
           reverse: true,
           onPageChanged: (index) async {

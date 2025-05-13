@@ -12,10 +12,11 @@ class CustomBottomNavBar extends StatelessWidget {
     final Logger logger = Logger();
     if (index == currentIndex) return;
     logger.i('Navigating to index $index from $currentIndex');
+    // Không truyền transition ở đây, chỉ gọi Get.toNamed như cũ
     Future.delayed(const Duration(milliseconds: 100), () {
       switch (index) {
         case 0:
-          Get.toNamed(Routes.home); // Sử dụng Get.toNamed để giữ trạng thái
+          Get.toNamed(Routes.home);
           break;
         case 1:
           Get.toNamed(Routes.dictionary);

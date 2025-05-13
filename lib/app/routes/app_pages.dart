@@ -38,23 +38,97 @@ class AppPages {
   static const initial = Routes.onboard;
 
   static final routes = [
-    GetPage(name: Routes.login, page: () => const LoginPage(), binding: LoginBinding()),
-    GetPage(name: Routes.register, page: () => const RegisterPage(), binding: RegisterBinding()),
-    GetPage(name: Routes.home, page: () => const HomePage(), binding: HomeBinding()),
-    GetPage(name: Routes.dictionary, page: () => const DictionaryPage(), binding: DictionaryBinding()),
-    GetPage(name: Routes.detection, page: () => const DetectionPage()),
-    GetPage(name: Routes.detectionresult, page: () => const DetectionResultPage(), binding: DetectionResultBinding()),
-    GetPage(name: Routes.achievements, page: () => const AchievementsPage(), binding: AchievementsBinding()),
-    GetPage(name: Routes.topic, page: () => const TopicPage(), binding: TopicBinding()),
-    GetPage(name: Routes.onboard, page: () => const OnboardingPage()),
-    GetPage(name: Routes.realtime, page: () => const RealtimePage()),
-    GetPage(name: Routes.aispeech, page: () => const AISpeechPage(), binding: AISpeechBinding()),
-    GetPage(name: Routes.pronunciationcheck, page: () => const PronunciationCheckPage(), binding: PronunciationCheckBinding()),
-    GetPage(name: Routes.exercise1, page: () => const Exercise1Page(), binding: Exercise1Binding()),
-    GetPage(name: Routes.exercise2, page: () => const Exercise2Page(), binding: Exercise2Binding()),
-    GetPage(name: Routes.exercise3, page: () => const Exercise3Page(), binding: Exercise3Binding()),
-    GetPage(name: Routes.exercise4, page: () => const Exercise4Page(), binding: Exercise4Binding()),
-    GetPage(name: Routes.leaderboard, page: () => const LeaderboardPage(), binding: LeaderboardBinding()),
-    GetPage(name: Routes.profile, page: () => const ProfilePage(), binding: ProfileBinding()),
+    GetPage(
+      name: Routes.login,
+      page: () => const LoginPage(),
+      binding: LoginBinding(),
+    ),
+    GetPage(
+      name: Routes.register,
+      page: () => const RegisterPage(),
+      binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: Routes.home,
+      page: () => const HomePage(),
+      binding: HomeBinding(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: Routes.dictionary,
+      page: () => const DictionaryPage(),
+      binding: DictionaryBinding(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: Routes.detection,
+      page: () => const DetectionPage(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: Routes.detectionresult,
+      page: () => const DetectionResultPage(),
+      binding: DetectionResultBinding(),
+    ),
+    GetPage(
+      name: Routes.achievements,
+      page: () => const AchievementsPage(),
+      binding: AchievementsBinding(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: Routes.topic,
+      page: () => const TopicPage(),
+      binding: TopicBinding(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: Routes.onboard,
+      page: () => const OnboardingPage(),
+    ),
+    GetPage(
+      name: Routes.realtime,
+      page: () => const RealtimePage(),
+    ),
+    GetPage(
+      name: Routes.aispeech,
+      page: () => const AISpeechPage(),
+      binding: AISpeechBinding(),
+    ),
+    GetPage(
+      name: Routes.pronunciationcheck,
+      page: () => const PronunciationCheckPage(),
+      binding: PronunciationCheckBinding(),
+    ),
+    GetPage(
+      name: Routes.exercise1,
+      page: () => const Exercise1Page(),
+      binding: Exercise1Binding(),
+    ),
+    GetPage(
+      name: Routes.exercise2,
+      page: () => const Exercise2Page(),
+      binding: Exercise2Binding(),
+    ),
+    GetPage(
+      name: Routes.exercise3,
+      page: () => const Exercise3Page(),
+      binding: Exercise3Binding(),
+    ),
+    GetPage(
+      name: Routes.exercise4,
+      page: () => const Exercise4Page(),
+      binding: Exercise4Binding(),
+    ),
+    GetPage(
+      name: Routes.leaderboard,
+      page: () => const LeaderboardPage(),
+      binding: LeaderboardBinding(),
+    ),
+    GetPage(
+      name: Routes.profile,
+      page: () => const ProfilePage(),
+      binding: ProfileBinding(),
+    ),
   ];
 }

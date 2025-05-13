@@ -5,7 +5,8 @@ class AuthManager {
   static const String _tokenKey = 'access_token';
   static const String _tokenExpiryKey = 'token_expiry';
   static const String _refreshTokenKey = 'refresh_token';
-  static const String _isGuestKey = 'is_guest'; // Thêm key để lưu trạng thái khách
+  static const String _isGuestKey = 'is_guest';
+  static const String _userTokenKey = 'user_token_key'; // Thêm key để lưu token hiện tại
   static final Logger logger = Logger();
 
   static Future<void> saveToken(String? token, int expiryInSeconds, {bool isGuest = false}) async {
@@ -16,9 +17,10 @@ class AuthManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_tokenKey, token);
+      await prefs.setString(_userTokenKey, token); // Lưu token hiện tại
       final expiryTime = DateTime.now().add(Duration(seconds: expiryInSeconds));
       await prefs.setString(_tokenExpiryKey, expiryTime.toIso8601String());
-      await prefs.setBool(_isGuestKey, isGuest); // Lưu trạng thái isGuest
+      await prefs.setBool(_isGuestKey, isGuest);
       logger.i('Token saved, expiry: ${expiryTime.toIso8601String()}, isGuest: $isGuest');
     } catch (e) {
       logger.e('Error saving token: $e');
@@ -43,7 +45,7 @@ class AuthManager {
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_tokenKey);
+    final token = prefs.getString(_userTokenKey); // Lấy token hiện tại
     logger.i('Retrieved token: $token');
     return token;
   }
@@ -93,7 +95,8 @@ class AuthManager {
       await prefs.remove(_tokenKey);
       await prefs.remove(_tokenExpiryKey);
       await prefs.remove(_refreshTokenKey);
-      await prefs.remove(_isGuestKey); // Xóa trạng thái isGuest
+      await prefs.remove(_isGuestKey);
+      await prefs.remove(_userTokenKey); // Xóa luôn user_token_key khi logout
       logger.i('Token cleared');
     } catch (e) {
       logger.e('Error clearing token: $e');

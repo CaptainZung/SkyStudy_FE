@@ -4,6 +4,7 @@ import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skystudy/app/modules/home/home_service.dart';
+import 'package:skystudy/app/utils/auth_manager.dart';
 
 class HomeController extends GetxController {
   final topics = [
@@ -35,15 +36,17 @@ class HomeController extends GetxController {
 
   Future<void> loadProgress() async {
     final prefs = await SharedPreferences.getInstance();
+    final token = await AuthManager.getToken() ?? '';
     for (var topic in topics) {
-      final progress = prefs.getInt('progress_$topic') ?? 1;
+      final progress = prefs.getInt('progress_${token}_$topic') ?? 1;
       topicProgress[topic] = progress;
     }
   }
 
   Future<void> saveProgress(String topic, int node) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('progress_$topic', node);
+    final token = await AuthManager.getToken() ?? '';
+    await prefs.setInt('progress_${token}_$topic', node);
     topicProgress[topic] = node;
   }
 
@@ -96,12 +99,13 @@ class HomeController extends GetxController {
       logger.e('Error loading progress from API: $e');
       // Fallback: Load progress from SharedPreferences if API fails
       final prefs = await SharedPreferences.getInstance();
-      currentTopic.value = prefs.getString('last_topic') ?? topics[0]; // Default to the first topic
-      currentNode.value = prefs.getInt('last_node') ?? 1; // Default to node 1
+      final token = await AuthManager.getToken() ?? '';
+      currentTopic.value = prefs.getString('last_topic_${token}') ?? topics[0]; // Default to the first topic
+      currentNode.value = prefs.getInt('last_node_${token}') ?? 1; // Default to node 1
 
       // Load progress for all topics from local storage
       for (var topic in topics) {
-        topicProgress[topic] = prefs.getInt('progress_$topic') ?? 1;
+        topicProgress[topic] = prefs.getInt('progress_${token}_$topic') ?? 1;
       }
 
       logger.i('Loaded progress from local: topic=${currentTopic.value}, node=${currentNode.value}');
@@ -111,19 +115,22 @@ class HomeController extends GetxController {
   // Thêm phương thức saveProgressToLocal
   Future<void> saveProgressToLocal(String topic, int node) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_topic', topic);
-    await prefs.setInt('last_node', node);
+    final token = await AuthManager.getToken() ?? '';
+    await prefs.setString('last_topic_${token}', topic);
+    await prefs.setInt('last_node_${token}', node);
   }
 
   Future<void> saveCurrentState() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('current_topic', currentTopic.value);
-    await prefs.setInt('current_node', currentNode.value);
+    final token = await AuthManager.getToken() ?? '';
+    await prefs.setString('current_topic_${token}', currentTopic.value);
+    await prefs.setInt('current_node_${token}', currentNode.value);
   }
 
   Future<void> loadCurrentState() async {
     final prefs = await SharedPreferences.getInstance();
-    currentTopic.value = prefs.getString('current_topic') ?? topics[0];
-    currentNode.value = prefs.getInt('current_node') ?? 1;
+    final token = await AuthManager.getToken() ?? '';
+    currentTopic.value = prefs.getString('current_topic_${token}') ?? topics[0];
+    currentNode.value = prefs.getInt('current_node_${token}') ?? 1;
   }
 }

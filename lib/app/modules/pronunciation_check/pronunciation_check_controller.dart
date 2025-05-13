@@ -11,7 +11,7 @@ import 'package:skystudy/app/api/ai_api.dart';
 import 'package:skystudy/app/modules/pronunciation_check/pronunciation_check_service.dart';
 import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:skystudy/app/utils/sound_manager.dart';
-
+import 'package:logger/logger.dart';
 class PronunciationCheckController extends GetxController {
   var isRecording = false.obs;
   var isProcessing = false.obs;
@@ -25,12 +25,13 @@ class PronunciationCheckController extends GetxController {
   var lottieAnimationPath = ''.obs;
   var feedbackMessage = ''.obs;
   late String sampleSentence;
+  final Logger logger = Logger();
 
   flutter_sound.FlutterSoundRecorder? _recorder;
-  audioplayers.AudioPlayer _audioPlayer = audioplayers.AudioPlayer();
+  audioplayers.AudioPlayer audioPlayer = audioplayers.AudioPlayer();
   List<int>? _recordedAudioBytes;
   StreamController<Uint8List>? _streamController;
-  final PronunciationCheckService _service = PronunciationCheckService(); 
+  final PronunciationCheckService service = PronunciationCheckService(); 
 
   @override
   void onInit() {
@@ -117,7 +118,7 @@ class PronunciationCheckController extends GetxController {
       ));
       request.fields['sample_sentence'] = sampleSentence;
 
-      print("Gửi sample_sentence: $sampleSentence");
+      logger.i("Gửi sample_sentence: $sampleSentence");
 
       final response = await request.send();
       final responseData = await response.stream.bytesToString();
@@ -138,11 +139,11 @@ class PronunciationCheckController extends GetxController {
           await SoundManager.playWrongSound();
         }
       } else {
-        print("Lỗi server: ${response.statusCode} - $responseData");
+        logger.i("Lỗi server: ${response.statusCode} - $responseData");
         Get.snackbar('Lỗi', 'Kiểm tra phát âm thất bại: $responseData');
       }
     } catch (e) {
-      print("Lỗi client: $e");
+      logger.i("Lỗi client: $e");
       Get.snackbar('Lỗi', 'Lỗi khi kiểm tra phát âm: $e');
     } finally {
       isProcessing.value = false; // Đảm bảo trạng thái được cập nhật ngay lập tức
@@ -157,8 +158,8 @@ class PronunciationCheckController extends GetxController {
       try {
         isPlayingSampleSentence.value = true;
         final audioBytes = base64Decode(sampleSentenceAudioBase64.value);
-        await _audioPlayer.play(audioplayers.BytesSource(audioBytes));
-        _audioPlayer.onPlayerStateChanged.listen((state) {
+        await audioPlayer.play(audioplayers.BytesSource(audioBytes));
+        audioPlayer.onPlayerStateChanged.listen((state) {
           if (state == audioplayers.PlayerState.completed) {
             isPlayingSampleSentence.value = false;
           }
@@ -175,8 +176,8 @@ class PronunciationCheckController extends GetxController {
       try {
         isPlayingTts.value = true;
         final audioBytes = base64Decode(ttsAudioBase64.value);
-        await _audioPlayer.play(audioplayers.BytesSource(audioBytes));
-        _audioPlayer.onPlayerStateChanged.listen((state) {
+        await audioPlayer.play(audioplayers.BytesSource(audioBytes));
+        audioPlayer.onPlayerStateChanged.listen((state) {
           if (state == audioplayers.PlayerState.completed) {
             isPlayingTts.value = false;
           }
@@ -213,7 +214,7 @@ class PronunciationCheckController extends GetxController {
   @override
   void onClose() {
     _recorder?.closeRecorder();
-    _audioPlayer.dispose();
+    audioPlayer.dispose();
     _streamController?.close();
     super.onClose();
   }

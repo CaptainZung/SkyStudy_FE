@@ -74,7 +74,7 @@ class ProfileController extends GetxController {
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/updateAvatar'),
         headers: {
-          'Authorization': 'Bearer $token', // Gửi token trong header
+          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: json.encode({'avatar': avatarName}), // Gửi body với key "avatar"

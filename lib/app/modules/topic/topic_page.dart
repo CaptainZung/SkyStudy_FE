@@ -56,7 +56,7 @@ class TopicPage extends GetView<TopicController> {
           },
         ),
       ),
-            bottomNavigationBar: const CustomBottomNavBar(currentIndex: 5),
+            bottomNavigationBar: const CustomBottomNavBar(currentIndex: 4),
     );
   }
 }

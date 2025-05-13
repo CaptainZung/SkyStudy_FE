@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:skystudy/app/routes/app_pages.dart';
 import 'exercise_3_controller.dart';
 import 'package:skystudy/app/modules/global_widgets/appbar.dart';
 

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:lottie/lottie.dart';
 import 'exercise_1_controller.dart';
-import 'package:skystudy/app/routes/app_pages.dart';
 import 'package:skystudy/app/modules/global_widgets/appbar.dart'; // Import CustomAppBar
 import 'package:skystudy/app/utils/sound_manager.dart'; // Import SoundManager
 

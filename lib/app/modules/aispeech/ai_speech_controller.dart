@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:skystudy/app/api/ai_api.dart';
+import 'package:logger/logger.dart';
 
 class AISpeechController extends GetxController {
   var isPlaying = false.obs;
@@ -13,6 +14,7 @@ class AISpeechController extends GetxController {
   late String sentence;
   late String translatedSentence;
   late List<String> words; // Danh sách các từ trong câu
+  final Logger logger = Logger();
   AudioPlayer audioPlayer = AudioPlayer();
   String audioBase64 = '';
 
@@ -29,7 +31,7 @@ class AISpeechController extends GetxController {
         .split(' ')
         .where((word) => word.isNotEmpty)
         .toList();
-    print('AISpeechController initialized. Sentence: $sentence, Translated: $translatedSentence');
+    logger.i('AISpeechController initialized. Sentence: $sentence, Translated: $translatedSentence');
   }
 
   // Hàm để chuyển đổi giọng nói
@@ -61,14 +63,14 @@ class AISpeechController extends GetxController {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         audioBase64 = data['audio_base64']?.toString() ?? '';
-        print('Audio fetched successfully. Base64 length: ${audioBase64.length}');
+        logger.i('Audio fetched successfully. Base64 length: ${audioBase64.length}');
       } else {
-        print('Error response: ${response.body}'); // In chi tiết lỗi từ backend
+        logger.e('Error response: ${response.body}'); // In chi tiết lỗi từ backend
         Get.snackbar('Lỗi', 'Không thể lấy audio: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       Get.snackbar('Lỗi', 'Lỗi khi gọi API audio: $e');
-      print('Error fetching audio: $e');
+      logger.e('Error fetching audio: $e');
     }
   }
 
@@ -102,7 +104,7 @@ class AISpeechController extends GetxController {
       _startHighlighting();
     } catch (e) {
       Get.snackbar('Lỗi', 'Lỗi khi phát âm thanh: $e');
-      print('Error playing audio: $e');
+      logger.e('Error playing audio: $e');
       isPlaying.value = false;
       isPaused.value = false;
       highlightedWordIndex.value = -1;
@@ -140,7 +142,7 @@ class AISpeechController extends GetxController {
 
   Future<void> _continueHighlighting() async {
     for (int i = highlightedWordIndex.value + 1; i < words.length; i++) {
-      if (!isPlaying.value) break; // Dừng highlight nếu không còn phát
+      if (!isPlaying.value) break;
       highlightedWordIndex.value = i;
       await Future.delayed(const Duration(milliseconds: 350));
     }

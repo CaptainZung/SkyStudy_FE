@@ -4,10 +4,11 @@ import 'dart:convert';
 import '../../utils/auth_manager.dart';
 import '../../api/api_config.dart';
 import 'package:skystudy/app/modules/profile/profile_controller.dart';
-
+import 'package:logger/logger.dart';
 class DailyCheckController extends GetxController {
   RxList<bool> checkedDays = List.generate(7, (_) => false).obs;
   var isLoading = false.obs;
+  final Logger logger = Logger();
   
   @override
   void onInit() {
@@ -48,7 +49,7 @@ class DailyCheckController extends GetxController {
           'Content-Type': 'application/json',
         },
       );
-      print('CheckIn response: ${response.statusCode} - ${response.body}');
+      logger.i('CheckIn response: ${response.statusCode} - ${response.body}');
       final shortBody = response.body.length > 100 ? response.body.substring(0, 100) + '...' : response.body;
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -61,13 +62,15 @@ class DailyCheckController extends GetxController {
         try {
           final profileController = Get.find<ProfileController>();
           await profileController.fetchProfileData();
-        } catch (e) {}
+        } catch (e) { 
+          logger.e('Lỗi fetching profile data: $e');
+        }
       } else {
-        Get.snackbar('Lỗi', 'Có lỗi xảy ra: ${response.statusCode} - ${shortBody}');
+        logger.e('CheckIn failed: ${response.statusCode} - $shortBody');
       }
     } catch (e) {
       final errMsg = e.toString().length > 100 ? e.toString().substring(0, 100) + '...' : e.toString();
-      print('CheckIn error: ${errMsg}');
+      logger.e('CheckIn error: $errMsg');
       Get.snackbar('CheckIn Error', errMsg);
     } finally {
       isLoading.value = false;

@@ -1,5 +1,4 @@
 import 'package:just_audio/just_audio.dart' as just_audio;
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';

@@ -34,12 +34,6 @@ class SkyStudyAppState extends State<SkyStudyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    // Removed SoundManager.stopMusic() to allow music to continue playing in the background
-  }
-
   Future<String> _determineInitialRoute() async {
     final bool hasSeenOnboarding = await OnboardingManager.hasSeenOnboarding();
     final bool isLoggedIn = await AuthAPI().isLoggedIn();
